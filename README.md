@@ -1,2 +1,2 @@
-# `phenofhy`
-# A Python package for Our Future Health analysis 
+# `phenofhy` 
+Phenofhy (Processing pHENotype Our Future Health data in pYthon) is a Python library.
