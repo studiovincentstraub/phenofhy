@@ -6,10 +6,8 @@
   "BASE_PATHS": {
     "helpers": "helpers/",
     "metadata": "metadata/",
-    "ofh_tools": "applets/ofh_tools/",
+    "phenofhy": "applets/phenofhy/",
     "inputs": {
-      "genomics": "inputs/genomics/",
-      "other_data": "inputs/other_data/",
       "phenotype_files": "inputs/phenotype_files/",
       "phenotype_lists_raw": "inputs/phenotype_files/pheno_lists/raw/",
       "phenotype_lists_processed": "inputs/phenotype_files/pheno_lists/processed/"
@@ -26,7 +24,7 @@
   "FILES": {
     "CODINGS": {
       "BASE": "metadata",
-      "FILENAME": "study_ofhs240228_20250331135749.dataset.codings.csv",
+      "FILENAME": "insert_project_name.dataset.codings.csv",
       "ID": "insert_id_here"
     },
     "CPRA_VARIANT_LIST_GRCH38": {
@@ -36,12 +34,12 @@
     },
     "DATA_DICT": {
       "BASE": "metadata",
-      "FILENAME": "study_ofhs240228_20250331135749.dataset.data_dictionary.csv",
+      "FILENAME": "insert_project_name.dataset.data_dictionary.csv",
       "ID": "insert_id_here"
     },
     "ENTITY_DICT": {
       "BASE": "metadata",
-      "FILENAME": "study_ofhs240228_20250331135749.dataset.entity_dictionary.csv",
+      "FILENAME": "insert_project_name.dataset.entity_dictionary.csv",
       "ID": "insert_id_here"
     },
     "PHENOTYPE_FILES": {
@@ -52,12 +50,12 @@
       },
       "EXAMPLE_RAW_PHENOTYPE_1": {
         "BASE": "inputs.phenotype_lists_raw",
-        "FILENAME": "pheno_list_ADHD_raw.csv",
+        "FILENAME": "pheno_list_raw.csv",
         "ID": "insert_id_here"
       }
     },
     "UTILS": {
-      "BASE": "ofh_tools",
+      "BASE": "phenofhy",
       "FILENAME": "utils.py",
       "ID": "insert_id_here"
     }
