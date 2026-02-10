@@ -1,0 +1,67 @@
+{
+  "PROJECT_ID": "insert_id_here",
+  "PROJECT_ID_LONG": "insert_id_here",
+  "PROJECT_DIR_PATH": "/mnt/project/",
+
+  "BASE_PATHS": {
+    "helpers": "helpers/",
+    "metadata": "metadata/",
+    "ofh_tools": "applets/ofh_tools/",
+    "inputs": {
+      "genomics": "inputs/genomics/",
+      "other_data": "inputs/other_data/",
+      "phenotype_files": "inputs/phenotype_files/",
+      "phenotype_lists_raw": "inputs/phenotype_files/pheno_lists/raw/",
+      "phenotype_lists_processed": "inputs/phenotype_files/pheno_lists/processed/"
+    }
+  },
+
+  "COHORTS": {
+    "FULL_SAMPLE": "insert_id_here",
+    "GENOTYPED": "insert_id_here",
+    "NONGENOTYPED": "insert_id_here",
+    "TEST_COHORT": "insert_id_here"
+  },
+
+  "FILES": {
+    "CODINGS": {
+      "BASE": "metadata",
+      "FILENAME": "study_ofhs240228_20250331135749.dataset.codings.csv",
+      "ID": "insert_id_here"
+    },
+    "CPRA_VARIANT_LIST_GRCH38": {
+      "BASE": "metadata",
+      "FILENAME": "our_future_health_cpra_variant_list_grch38.csv",
+      "ID": "insert_id_here"
+    },
+    "DATA_DICT": {
+      "BASE": "metadata",
+      "FILENAME": "study_ofhs240228_20250331135749.dataset.data_dictionary.csv",
+      "ID": "insert_id_here"
+    },
+    "ENTITY_DICT": {
+      "BASE": "metadata",
+      "FILENAME": "study_ofhs240228_20250331135749.dataset.entity_dictionary.csv",
+      "ID": "insert_id_here"
+    },
+    "PHENOTYPE_FILES": {
+      "PILOT_PHENOTYPES": {
+        "BASE": "inputs.phenotype_files",
+        "FILENAME": "pilot_phenotypes.csv",
+        "ID": "insert_id_here"
+      },
+      "EXAMPLE_RAW_PHENOTYPE_1": {
+        "BASE": "inputs.phenotype_lists_raw",
+        "FILENAME": "pheno_list_ADHD_raw.csv",
+        "ID": "insert_id_here"
+      }
+    },
+    "UTILS": {
+      "BASE": "ofh_tools",
+      "FILENAME": "utils.py",
+      "ID": "insert_id_here"
+    }
+  }
+}
+
+
