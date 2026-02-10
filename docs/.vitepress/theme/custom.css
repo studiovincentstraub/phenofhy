@@ -1,0 +1,63 @@
+/* =========================
+   Phenofhy brand palette
+   ========================= */
+
+/* =========================
+   Light mode
+   ========================= */
+:root {
+  /* Brand (identity first) */
+  --vp-c-brand-1: #ffbb00; /* primary yellow */
+  --vp-c-brand-2: #eab308; /* darker yellow for hover/emphasis */
+  --vp-c-brand-3: #0053b3; /* deep brand blue */
+
+  /* Surfaces / backgrounds */
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f8f5ef;
+  --vp-c-bg-alt: #f6f8fb;
+
+  /* Text */
+  --vp-c-text-1: #011d4b; /* primary text (dark blue) */
+  --vp-c-text-2: #334155; /* secondary text (cool neutral) */
+
+  --vp-code-bg: rgba(234, 179, 8, 0.18);
+  --vp-code-color: #011d4b;
+
+  /* Links / interactions */
+  --vp-c-link: #0053b3;
+  --vp-c-link-hover: #003f8a;
+
+  /* Borders / dividers */
+  --vp-c-divider: rgba(1, 29, 75, 0.15);
+}
+
+
+/* =========================
+   Dark mode (fixed + consistent)
+   ========================= */
+.dark {
+  /* Brand */
+  --vp-c-brand-1: #fec832; /* primary yellow */
+  --vp-c-brand-2: #facc15;
+  --vp-c-brand-3: #60a5fa;
+
+  /* Global surfaces (NAV + PAGE MATCH) */
+  --vp-c-bg: #011d4b;       /* main background */
+  --vp-c-bg-soft: #011d4b;  /* match nav + content */
+  --vp-c-bg-alt: #0b2b66;   /* subtle elevation only */
+
+  /* Text (NO blue-on-blue) */
+  --vp-c-text-1: #ffffff;  /* primary text */
+  --vp-c-text-2: #cbd5e1;  /* secondary text (neutral) */
+
+  /* Links (brand-aligned, readable) */
+  --vp-c-link: #fec832;
+  --vp-c-link-hover: #fde68a;
+
+  /* Dividers */
+  --vp-c-divider: rgba(255, 255, 255, 0.14);
+
+  /* Inline code */
+  --vp-code-bg: rgba(234, 179, 8, 0.22);
+  --vp-code-color: #fec832;
+}
