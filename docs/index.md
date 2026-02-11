@@ -1,4 +1,6 @@
 ---
+
+Released under a BSD-3-Clause License. Copyright © 2026 [Studio Vincent Straub](https://www.vincentjstraub.com/)
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
@@ -9,10 +11,10 @@ hero:
   actions:
     - theme: brand
       text: Documentation
-      link: /getting-started/quickstart
+      link: /getting-started/environment
     - theme: alt
-      text: Concepts
-      link: /concepts/overview
+      text: Quickstart
+      link: /getting-started/quickstart
 
 features:
   - icon: 🖥️
