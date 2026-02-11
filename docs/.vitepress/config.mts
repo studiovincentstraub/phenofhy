@@ -14,10 +14,10 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Getting Started', link: '/getting-started/quickstart' },
-      { text: 'Concepts', link: '/concepts/overview' },
-      { text: 'API Reference', link: '/api/' },
       { text: 'Support', link: '/support/faq' },
+    ],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/studiovincentstraub/phenofhy' }
     ],
     sidebar: [
       {
