@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Phenofhy",
   description: "Python package for phenotype data processing and analysis within the Our Future Health TRE",
-  base: '/',
+  base: '/phenofhy/',
 
   // preferred (maintainer-recommended) way to set initial appearance
   appearance: {

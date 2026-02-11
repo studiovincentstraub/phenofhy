@@ -1,0 +1,1 @@
+import{_ as e,o as i,c as s,ah as l}from"./chunks/framework.D70b1pOo.js";const k=JSON.parse('{"title":"load","description":"","frontmatter":{},"headers":[],"relativePath":"api/load.md","filePath":"api/load.md"}'),t={name:"api/load.md"};function n(o,a,d,h,r,p){return i(),s("div",null,[...a[0]||(a[0]=[l("",6)])])}const m=e(t,[["render",n]]);export{k as __pageData,m as default};
