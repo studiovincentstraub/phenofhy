@@ -1,6 +1,4 @@
 ---
-
-Released under a BSD-3-Clause License. Copyright © 2026 [Studio Vincent Straub](https://www.vincentjstraub.com/)
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 

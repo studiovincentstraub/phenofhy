@@ -14,11 +14,15 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Support', link: '/support/faq' },
+      { text: 'Support', link: '/support/bug-reports' },
     ],
     socialLinks: [
       { icon: 'github', link: 'https://github.com/studiovincentstraub/phenofhy' }
     ],
+    footer: {
+      message: 'Released under a BSD-3-Clause License.',
+      copyright: 'Copyright © 2026 <a href="https://www.vincentjstraub.com/" target="_blank" rel="noreferrer">Studio Vincent Straub</a>'
+    },
     sidebar: [
       {
         text: 'Getting Started',
