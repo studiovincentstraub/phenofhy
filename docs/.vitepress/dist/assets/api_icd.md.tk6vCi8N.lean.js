@@ -1,0 +1,1 @@
+import{_ as a,o as s,c as t,ah as e}from"./chunks/framework.DA8bEdPh.js";const o=JSON.parse('{"title":"icd","description":"","frontmatter":{},"headers":[],"relativePath":"api/icd.md","filePath":"api/icd.md"}'),n={name:"api/icd.md"};function l(h,i,d,p,r,c){return s(),t("div",null,[...i[0]||(i[0]=[e("",6)])])}const _=a(n,[["render",l]]);export{o as __pageData,_ as default};
