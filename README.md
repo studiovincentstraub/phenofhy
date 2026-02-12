@@ -1,12 +1,13 @@
 ![cover image](logo/phenofhy-logo.png)
 
-# phenofhy (beta)
+# Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
 Python package for phenotype analysis in the Our Future Health (OFH) trusted
-research environment (TRE). phenofhy is designed to make extraction, processing,
-and reporting of OFH phenotype data quick and repeatable inside DNAnexus.
+research environment (TRE). Phenofhy is designed to make extraction, processing,
+and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is user-friendly, efficient and easy to install. Built for the OFH DNAnexus trusted research environment.
 
-## Why phenofhy
+
+## Why Phenofhy
 
 - Purpose-built for the OFH TRE and DNAnexus tooling.
 - Easily extract and preprocess phenotype data in a few lines of intuitive code.
@@ -20,35 +21,35 @@ and reporting of OFH phenotype data quick and repeatable inside DNAnexus.
 
 ## Installation (TRE)
 
-phenofhy is currently a beta package for the OFH TRE. There is no automated
+Phenofhy is currently a beta package for the OFH TRE. There is no automated
 installer yet.
 
 1. Download a zip of the repository from GitHub:
-   https://github.com/studiovincentstraub/phenofhy
-2. Upload the `phenofhy/` folder into the TRE using the Airlock process.
+   https://github.com/studiovincentstraub/Phenofhy
+2. Upload the `Phenofhy/` folder into the TRE using the Airlock process.
    Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
-3. Copy `beta/phenofhy/config.json` into `/mnt/project/helpers/config.json` and
+3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
    update the IDs for your study (project IDs, cohorts, codings, dictionaries).
 
-Tip: when you upload the package, avoid nesting `phenofhy` inside another
-`phenofhy` folder. The TRE should contain a single `phenofhy/` directory that
+Tip: when you upload the package, avoid nesting `Phenofhy` inside another
+`Phenofhy` folder. The TRE should contain a single `Phenofhy/` directory that
 includes the beta modules, which can be optionally nested inside a `applets/` folder.
 
 ## Environment
 
-phenofhy is designed to run inside the OFH TRE with DNAnexus tooling and
+Phenofhy is designed to run inside the OFH TRE with DNAnexus tooling and
 JupyterLab. It can be used on simulated data outside the TRE for local testing,
 but the main workflows assume access to OFH datasets and the `dx` toolkit.
 
 ## Documentation
 
-Explore the full phenofhy documentation here: https://studiovincentstraub.github.io/phenofhy/
+Explore the full Phenofhy documentation here: https://studiovincentstraub.github.io/Phenofhy/
 Even though the documentation website is still under construction, you can
 already find useful information there.
 
 Where to start on the documentation website?
 
-- New to phenofhy or OFH phenotype analysis? Begin with "About" and then the
+- New to Phenofhy or OFH phenotype analysis? Begin with "About" and then the
 	"Quickstart" for a smooth introduction.
 - Got your own data? After "About" and "Quickstart", you are ready to dive in
 	and start analyzing.
@@ -57,7 +58,7 @@ Where to start on the documentation website?
 
 ## Contributing
 
-phenofhy is an internal beta and is evolving quickly. If you find a bug or want
+Phenofhy is an internal beta and is evolving quickly. If you find a bug or want
 to suggest an improvement, open an issue or start a discussion in the
 repository. 
 
