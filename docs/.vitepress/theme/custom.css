@@ -62,3 +62,16 @@
   --vp-code-color: #fec832;
 }
 
+/* Home hero: replace text with logo */
+.VPHomeHero .name {
+   display: inline-block;
+   width: clamp(300px, 40vw, 520px);
+   height: clamp(72px, 14vw, 132px);
+   margin: 0 0 0.25rem 0;
+   background: url("/logo/phenofhy-logo.png") no-repeat left top / contain;
+   text-indent: -9999px;
+   overflow: hidden;
+   white-space: nowrap;
+   line-height: 1;
+}
+

@@ -5,11 +5,8 @@ export default defineConfig({
   description: "Python package for phenotype data processing and analysis within the Our Future Health TRE",
   base: '/phenofhy/',
 
-  // preferred (maintainer-recommended) way to set initial appearance
-  appearance: {
-    // @ts-expect-error not fully supported in the types yet
-    initialValue: 'light'
-  },
+  // disable dark mode
+  appearance: false,
 
   themeConfig: {
     nav: [
