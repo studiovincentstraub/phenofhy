@@ -1,7 +1,6 @@
 ![cover image](logo/phenofhy-logo.png)
 
-# Phenofhy (beta): Python package for phenotype analysis of Our Future Health
-
+# Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
 Python package for phenotype analysis in the Our Future Health (OFH) trusted
 research environment (TRE). Phenofhy is designed to make extraction, processing,
