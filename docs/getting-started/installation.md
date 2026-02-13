@@ -37,7 +37,7 @@ Copy it into the TRE helpers directory and update the IDs for your study:
 
 - `PROJECT_ID` and `PROJECT_ID_LONG`
 - `COHORTS` entries (for example, `FULL_SAMPLE` and `TEST_COHORT`). These can be created using the cohort browser and saving cohort dashboard views; for instructions, see: https://documentation.dnanexus.com/user/cohort-browser/defining-cohorts
-- `FILES` entries for codings and dictionaries, should you wish to save these to file
+- `FILES` entries for the OFH [coding and data dictionary files](https://research.ourfuturehealth.org.uk/data-and-cohort/), should you have already created and saved these in an OFH project. If not, Phenofhy will automatically create them for you using `phenofhy.load.metadata()` and store them in a `metadata/` directory. 
 
 You will usually edit this file from a JupyterLab instance in the TRE, but you can
 also update it locally before uploading. Expect to refresh file IDs over time as

@@ -39,8 +39,9 @@ def phenotype_profile(
     bmi_col: Optional[str] = "derived.bmi",
     height_col: Optional[str] = "clinic_measurements.height",
     metadata_dir: str = "./metadata",
-    age_bin_width: int = 2,
-    min_n_per_bin: int = 30,
+    age_bin_width: int = 1,
+    body_bin_width: int = 1,
+    min_n_per_bin: int = 1,
     output: Optional[str] = None,
 ) -> Tuple[plt.Figure, Dict[str, Any]]:
 
@@ -58,16 +59,22 @@ def phenotype_profile(
     demographics = _summarize_demographics(working, sex_col=sex_col, age_col=age_col, ethnicity_col=None)
 
     # Multi-panel layout (4x2 grid; bottom row metadata spans both columns)
-    fig = plt.figure(figsize=(13.5, 16))
-    gs = fig.add_gridspec(4, 2, height_ratios=[1.1, 1.1, 1.1, 0.3], hspace=0.55, wspace=0.3)
+    fig = plt.figure(figsize=(13.5, 18))
+    gs = fig.add_gridspec(
+        5, 2,
+        height_ratios=[1.1, 1.1, 1.1, 0.15, 0.3],
+        hspace=0.55,
+        wspace=0.3
+    )
 
-    ax_overview = fig.add_subplot(gs[3, :])   # metadata spans full width
+    ax_overview = fig.add_subplot(gs[4, :])  # metadata spans full width (now row 4)
     ax_demo = fig.add_subplot(gs[0, 0])
     ax_complete = fig.add_subplot(gs[0, 1])
     ax_dist = fig.add_subplot(gs[1, 0])
     ax_age = fig.add_subplot(gs[1, 1])
     ax_bmi = fig.add_subplot(gs[2, 0])
     ax_height = fig.add_subplot(gs[2, 1])
+    # row 3 is the spacer (no axes)
 
     for ax in [ax_overview, ax_demo, ax_complete, ax_dist, ax_age, ax_bmi, ax_height]:
         ax.set_facecolor(COLOR_BAND_1)
@@ -85,8 +92,8 @@ def phenotype_profile(
     _plot_completeness(ax_complete, sample_flow)
     _plot_distribution(ax_dist, working, phenotype, field_label, ptype, sex_label_col="__sex_label")
     _plot_age_trend(ax_age, working, phenotype, field_label, age_col, min_n_per_bin, age_bin_width)
-    _plot_body_trend(ax_bmi, working, phenotype, field_label, bmi_col, min_n_per_bin)
-    _plot_body_trend(ax_height, working, phenotype, field_label, height_col, min_n_per_bin)
+    _plot_body_trend(ax_bmi, working, phenotype, field_label, bmi_col, min_n_per_bin, body_bin_width)
+    _plot_body_trend(ax_height, working, phenotype, field_label, height_col, min_n_per_bin, body_bin_width)
 
     if ax_bmi.lines and ax_height.lines:
         y_max = max(ax_bmi.get_ylim()[1], ax_height.get_ylim()[1])
@@ -434,18 +441,40 @@ def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: 
         return
 
     if ptype == "continuous":
+        annotations = []
         for label, color in [("Male", COLOR_MALE), ("Female", COLOR_FEMALE)]:
             sub = df.loc[sexes == label, phenotype].dropna()
             if sub.empty:
                 continue
             ax.hist(sub, bins=30, alpha=0.35, label=label, color=color)
             mean = sub.mean()
-            ax.axvline(mean, linestyle="--", color=color, linewidth=1.8, label=f"{label} mean={mean:.2f}")
+            ax.axvline(mean, linestyle="--", color=color, linewidth=1.8)
+            annotations.append((label, mean, color))
+        for idx, (label, mean, color) in enumerate(annotations):
+            y_pos = 0.96 - (idx * 0.07)
+            ax.plot(
+                [0.62, 0.69],
+                [y_pos - 0.015, y_pos - 0.015],
+                transform=ax.transAxes,
+                linestyle="--",
+                color=color,
+                linewidth=1.8,
+            )
+            ax.text(
+                0.98,
+                y_pos,
+                f"{label} mean: {mean:.2f}",
+                transform=ax.transAxes,
+                ha="right",
+                va="top",
+                fontsize=TEXT_FONTSIZE,
+                color=color,
+            )
         ax.set_xlabel(field_label, fontsize=TEXT_FONTSIZE)
         ax.set_ylabel("Count", fontsize=TEXT_FONTSIZE)
         ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
         ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
     else:
         labels = None
         for label, color in [("Male", COLOR_MALE), ("Female", COLOR_FEMALE)]:
@@ -462,7 +491,7 @@ def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: 
         ax.set_ylabel("Count", fontsize=TEXT_FONTSIZE)
         ax.tick_params(axis="y", labelsize=TEXT_FONTSIZE)
         ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
 def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_width):
@@ -506,10 +535,10 @@ def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_widt
     ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
-def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n):
+def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width):
     # body_col might be None or missing
     ax.clear()
     title = f"Mean by {body_col.split('.')[-1] if body_col else ''} (binned)"
@@ -533,11 +562,15 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n):
         ax.set_axis_off()
         return
 
-    # use quantile bins (10) with duplicates dropped
-    try:
-        tmp["_bin"] = pd.qcut(tmp[body_col], q=10, duplicates="drop")
-    except Exception:
-        tmp["_bin"] = pd.cut(tmp[body_col], bins=10)
+    # use fixed-width bins (e.g., 1 unit) so every unit gets its own bin
+    bmin = float(np.floor(tmp[body_col].min()))
+    bmax = float(np.ceil(tmp[body_col].max()))
+    if bin_width <= 0:
+        raise ValueError("bin_width must be > 0")
+    bins = np.arange(bmin, bmax + bin_width, bin_width)
+    if len(bins) < 2:
+        bins = np.array([bmin, bmax + 1.0])
+    tmp["_bin"] = pd.cut(tmp[body_col], bins=bins, right=False, include_lowest=True)
 
     grouped = (
         tmp.groupby(["_bin", "__sex_label"], observed=False)
@@ -556,7 +589,7 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n):
     ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
 # End of module

@@ -91,6 +91,11 @@ def _download_metadata_files() -> Dict[str, Path]:
 
     # 3) Fetch into ./metadata (force destination)
     fetched: Dict[str, Path] = {"codings": None, "data_dictionary": None, "entity_dictionary": None}  # type: ignore
+    file_info_map = {
+        "codings": codings_info,
+        "data_dictionary": data_dict_info,
+        "entity_dictionary": entity_dict_info,
+    }
 
     try:
         fetched["codings"] = Path(
@@ -140,8 +145,19 @@ def _download_metadata_files() -> Dict[str, Path]:
 
         dumped = _find_dumped_dictionary_files(METADATA_DIR)
         for key in ("codings", "data_dictionary", "entity_dictionary"):
+            dumped_path = dumped.get(key)
             if fetched[key] is None:
-                fetched[key] = dumped.get(key)
+                if dumped_path is None:
+                    continue
+                desired_name = file_info_map[key].get("FILENAME", dumped_path.name)
+                desired_path = METADATA_DIR / desired_name
+                if dumped_path != desired_path:
+                    if desired_path.exists():
+                        desired_path.unlink()
+                    dumped_path.replace(desired_path)
+                fetched[key] = desired_path
+            elif dumped_path is not None and dumped_path.exists() and Path(fetched[key]) != dumped_path:
+                dumped_path.unlink()
 
     # 5) Sanity: ensure presence (dx may omit empties by design; tighten or relax policy as needed)
     if any(fetched[k] is None for k in fetched):

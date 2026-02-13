@@ -32,19 +32,20 @@ def _filter_clinic_measurements_plausibility(
 ) -> pd.DataFrame:
     """
     Internal helper: drop rows where clinic measurement values are outside
-    plausible bounds. NA values are preserved (not dropped).
+    plausible bounds as defined by the Biometrics Ranges and Proforma 
+    defined by Our Future Health. NA values are preserved (not dropped).
 
     Default plausible ranges (can be overridden by passing `ranges`):
-      - clinic_measurements.height   : (100, 250)  # cm
-      - clinic_measurements.weight   : (30, 200)   # kg
-      - clinic_measurements.waist    : (40, 150)   # cm
+      - clinic_measurements.height   : (90, 299)  # cm
+      - clinic_measurements.weight   : (20, 400)   # kg
+      - clinic_measurements.waist    : (30, 200)   # cm
 
     The function will only check columns that exist in `df`.
     """
     default_ranges = {
-        "clinic_measurements.height": (100.0, 250.0),
-        "clinic_measurements.weight": (30.0, 200.0),
-        "clinic_measurements.waist": (40.0, 150.0),
+        "clinic_measurements.height": (90, 299),
+        "clinic_measurements.weight": (20.0, 400.0),
+        "clinic_measurements.waist": (30.0, 200.0),
     }
     use_ranges = default_ranges if ranges is None else {**default_ranges, **ranges}
 
