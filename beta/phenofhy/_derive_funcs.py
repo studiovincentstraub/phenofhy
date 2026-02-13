@@ -151,13 +151,25 @@ def expand_multi_code_column(
     abbrev_map: Optional[Dict[str, str]] = MEDICAT_ABBREV,
     inplace: bool = True,
 ) -> pd.DataFrame:
-    """
-    Create binary indicator columns from a coding file and a participant multi-code column.
+    """Expand a multi-code column into binary indicator columns.
 
-    This is the generalized variant of 'get_dummies' for any multi-code field.
+    Args:
+        df: Input dataframe containing the multi-code column.
+        codings_glob: Glob pattern for codings CSV files.
+        coding_name: Coding name to filter within the codings file.
+        col: Multi-code column to expand.
+        prefix: Prefix for derived indicator columns.
+        exclude_codes: Codes to exclude from expansion.
+        abbrev_map: Optional mapping for abbreviating column names.
+        inplace: If True, mutate the input dataframe.
 
-    Returns mapping DataFrame (raw_code, code_int, meaning, colname, prevalence).
-    The transient helper column "<col>_codes" is removed from `df` before returning.
+    Returns:
+        DataFrame with mapping metadata for created columns. Columns include
+        raw_code, code_int, meaning, colname, and prevalence.
+
+    Raises:
+        FileNotFoundError: If no codings files match codings_glob.
+        ValueError: If required columns are missing or no valid codes remain.
     """
     import glob
 
@@ -235,8 +247,13 @@ def expand_multi_code_column(
 # ------------------------------------------------------------------------------------
 
 def self_reported_sex(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Create derived.sex (numeric codes, categorical dtype).
+    """Create derived.sex as numeric codes with categorical dtype.
+
+    Args:
+        df: Input dataframe with demographic sex fields.
+
+    Returns:
+        DataFrame with derived.sex added.
     """
     df = df.copy()
     v2 = df.get("participant.demog_sex_2_1", pd.NA)
@@ -266,15 +283,14 @@ def self_reported_sex(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def registration_date(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Derive 'derived.registration_date' as a proper datetime column.
+        """Derive derived.registration_date as a datetime column.
 
-    - If the column already exists, it will be coerced to datetime.
-    - Otherwise, it is constructed from 'participant.registration_year' and
-      'participant.registration_month' (day set to 1).
-    - Returns the input DataFrame with a new/cleaned
-      'derived.registration_date' column (datetime64[ns]).
-    """
+        Args:
+                df: Input dataframe.
+
+        Returns:
+                DataFrame with derived.registration_date added or coerced.
+        """
     cols = set(df.columns)
     df = df.copy()
 
@@ -306,8 +322,13 @@ def registration_date(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def age_at_registration(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Derive age at registration (float, continuous).
+    """Derive derived.age_at_registration as continuous age in years.
+
+    Args:
+        df: Input dataframe with registration and birth date fields.
+
+    Returns:
+        DataFrame with derived.age_at_registration added.
     """
     cols = set(df.columns)
     have_A = {"derived.registration_date", "participant.date_of_birth"} <= cols
@@ -340,16 +361,15 @@ def age_at_registration(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def age_group(df: pd.DataFrame, bins=None, labels=None) -> pd.DataFrame:
-    """
-    Derive 'derived.age_group' from existing derived.age_at_registration (preferred)
-    or from registration / birth date fields (fallback).
+    """Derive derived.age_group from continuous age.
 
-    Default groups: all, 18-29, 30-59, 60+ (intervals are inclusive on the lower bound).
+    Args:
+        df: Input dataframe.
+        bins: Optional list of bin edges.
+        labels: Optional list of labels for bins.
 
-    Behavior:
-      - If 'derived.age_group' already exists, it will be replaced.
-      - If neither derived.age_at_registration nor the required raw date/year
-        fields exist, the function is a no-op and returns the original df.
+    Returns:
+        DataFrame with derived.age_group added.
     """
     cols = set(df.columns)
     age = None
@@ -417,8 +437,13 @@ def age_group(df: pd.DataFrame, bins=None, labels=None) -> pd.DataFrame:
 # ------------------------------------------------------------------------------------
 
 def bmi(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Derive BMI from clinic measurements (float, continuous).
+    """Derive derived.bmi from height and weight.
+
+    Args:
+        df: Input dataframe with clinic_measurements.height/weight.
+
+    Returns:
+        DataFrame with derived.bmi added.
     """
     cols = set(df.columns)
     need = {"clinic_measurements.height", "clinic_measurements.weight"}
@@ -436,9 +461,13 @@ def bmi(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def bmi_status(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Derive 'derived.bmi_status' (numeric code, categorical dtype).
-    Categories: 0=underweight, 1=normal, 2=overweight, 3=obese, -9=missing
+    """Derive derived.bmi_status as categorical BMI class codes.
+
+    Args:
+        df: Input dataframe with derived.bmi.
+
+    Returns:
+        DataFrame with derived.bmi_status added.
     """
     if "derived.bmi" not in df.columns:
         logger.info("bmi_status: skipped (requires 'derived.bmi').")
@@ -472,9 +501,15 @@ def vape_status(
     numeric: bool = True,
     out_col: str = "derived.vape_status"
 ) -> pd.DataFrame:
-    """
-    Derive vaping status as numeric code and categorical dtype.
-    1 = ever used, 0 = never used, -3 = prefer not to answer
+    """Derive vaping status as numeric codes with categorical dtype.
+
+    Args:
+        df: Input dataframe with vaping-related questionnaire fields.
+        numeric: Unused; kept for compatibility.
+        out_col: Output column name.
+
+    Returns:
+        DataFrame with derived vaping status column.
     """
     v1 = df.get("questionnaire.smoke_vape_1_1", None)
     v2 = df.get("questionnaire.smoke_tobacco_type_1_m", None)
@@ -513,9 +548,14 @@ def vape_status(
 
 
 def smoke_status_v1(df: pd.DataFrame, numeric: bool = True) -> pd.DataFrame:
-    """
-    Derive 'derived.smoke_status_v1' as numeric codes and categorical dtype.
-    Codes: 2=current, 1=former, 0=never, -1=unknown/prefer not to answer, -9=missing
+    """Derive derived.smoke_status_v1 as categorical smoking status codes.
+
+    Args:
+        df: Input dataframe with smoking questionnaire fields.
+        numeric: Unused; kept for compatibility.
+
+    Returns:
+        DataFrame with derived.smoke_status_v1 added.
     """
     need = {
         "questionnaire.smoke_status_1_1",
@@ -623,9 +663,14 @@ def tobacco_reg(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def smoke_status_v2(df: pd.DataFrame, numeric: bool = True) -> pd.DataFrame:
-    """
-    Derive 'derived.smoke_status_v2' as numeric codes and categorical dtype.
-    Codes: 2=current, 1=former, 0=never, -1=prefer not to answer/unknown, -9=missing
+    """Derive derived.smoke_status_v2 as categorical smoking status codes.
+
+    Args:
+        df: Input dataframe with smoking questionnaire fields.
+        numeric: Unused; kept for compatibility.
+
+    Returns:
+        DataFrame with derived.smoke_status_v2 added.
     """
     df = df.copy()
 
@@ -735,12 +780,19 @@ def medicat_expand(
     exclude_codes: Sequence[int] = (-7, -1, -3),
     abbrev_map: Optional[Dict[str, str]] = None,
 ) -> pd.DataFrame:
-    """
-    Wrapper derive that expands a multi-code raw column into binary flags.
+    """Expand medicat multi-code column into binary flags.
 
-    - Modifies `df` in-place by default (via expand_multi_code_column) and
-      returns the DataFrame (so it fits DERIVE_REGISTRY expectations).
-    - Swallows failures with a warning so auto-derive doesn't crash the whole pipeline.
+    Args:
+        df: Input dataframe.
+        codings_glob: Glob pattern for codings CSV files.
+        coding_name: Coding name to filter within the codings file.
+        col: Multi-code column to expand.
+        prefix: Prefix for derived indicator columns.
+        exclude_codes: Codes to exclude from expansion.
+        abbrev_map: Optional mapping for abbreviating column names.
+
+    Returns:
+        DataFrame with derived medication flags added.
     """
     if col not in df.columns:
         # Nothing to do
@@ -773,8 +825,15 @@ def any_hospital_contact(
     merged: Optional[pd.DataFrame] = None,
     before_registration: bool = False
 ) -> pd.DataFrame:
-    """Return merged DataFrame with derived.any_hospital_contact (0/1).
-    Accepts a dict of entity DataFrames or a single merged DataFrame.
+    """Derive derived.any_hospital_contact as a binary flag.
+
+    Args:
+        data: Dict of entity DataFrames or a merged DataFrame.
+        merged: Optional merged DataFrame to attach the derived column to.
+        before_registration: If True, count only pre-registration contacts.
+
+    Returns:
+        DataFrame with derived.any_hospital_contact added.
     """
     def pid_cols(df):
         return [c for c in df.columns if c == "pid" or c.lower().endswith(".pid") or c.lower().endswith("pid")]
@@ -857,10 +916,15 @@ def ae_visits(
     merged: Optional[pd.DataFrame] = None,
     before_registration: bool = False
 ) -> pd.DataFrame:
-    """Return merged DataFrame with derived.ae_visits (int count of unique A&E visits per pid).
-    Accepts a dict of entity DataFrames or a single merged DataFrame.
-    If `before_registration=True` will only count visits before the participant's registration date
-    (if a registration date column can be found on the target/merged frame).
+    """Derive derived.ae_visits as count of A&E visits per participant.
+
+    Args:
+        data: Dict of entity DataFrames or a merged DataFrame.
+        merged: Optional merged DataFrame to attach the derived column to.
+        before_registration: If True, count only pre-registration visits.
+
+    Returns:
+        DataFrame with derived.ae_visits added.
     """
     def pid_cols(df):
         return [c for c in df.columns if c == "pid" or c.lower().endswith(".pid") or c.lower().endswith("pid")]
@@ -940,9 +1004,15 @@ def apc_visits(
     merged: Optional[pd.DataFrame] = None,
     before_registration: bool = False
 ) -> pd.DataFrame:
-    """Return merged DataFrame with derived.apc_visits (int count of unique APC admissions per pid).
-    Counts unique epikey values for rows with a non-null admission date (admidate).
-    If before_registration=True, only counts admissions with ADMIDATE < registration_date (if available).
+    """Derive derived.apc_visits as count of inpatient admissions per participant.
+
+    Args:
+        data: Dict of entity DataFrames or a merged DataFrame.
+        merged: Optional merged DataFrame to attach the derived column to.
+        before_registration: If True, count only pre-registration admissions.
+
+    Returns:
+        DataFrame with derived.apc_visits added.
     """
     def pid_cols(df):
         return [c for c in df.columns if c == "pid" or c.lower().endswith(".pid") or c.lower().endswith("pid")]
@@ -1020,7 +1090,16 @@ def op_visits(
     merged: Optional[pd.DataFrame] = None,
     before_registration: bool = False
 ) -> pd.DataFrame:
-    """Counts unique outpatient records (attendkey / attend_key) per pid and returns target with derived.op_visits (int)."""
+    """Derive derived.op_visits as count of outpatient visits per participant.
+
+    Args:
+        data: Dict of entity DataFrames or a merged DataFrame.
+        merged: Optional merged DataFrame to attach the derived column to.
+        before_registration: If True, count only pre-registration visits.
+
+    Returns:
+        DataFrame with derived.op_visits added.
+    """
     def extract_op(df: pd.DataFrame):
         if df is None:
             return None
@@ -1073,11 +1152,16 @@ def total_hospital_contacts(
     before_registration: bool = False,
     winsorize_pct: float = 0.99
 ) -> pd.DataFrame:
-    """
-    Count distinct record IDs across AE (aekey), APC (epikey) and OP (attendkey) per PID.
-    Optionally consider only events before registration (if a registration date column exists).
-    Winsorise counts at the given percentile (default 0.99).
-    Output column: derived.total_hospital_contacts (int)
+    """Derive derived.total_hospital_contacts as total visit counts.
+
+    Args:
+        data: Dict of entity DataFrames or a merged DataFrame.
+        merged: Optional merged DataFrame to attach the derived column to.
+        before_registration: If True, count only pre-registration events.
+        winsorize_pct: Upper percentile to winsorize counts (0-1).
+
+    Returns:
+        DataFrame with derived.total_hospital_contacts added.
     """
     # helper to extract events (generic)
     def extract_events_from_entity(df: pd.DataFrame, key_suffixes, date_keywords):

@@ -39,11 +39,32 @@ def phenotype_profile(
     bmi_col: Optional[str] = "derived.bmi",
     height_col: Optional[str] = "clinic_measurements.height",
     metadata_dir: str = "./metadata",
-    age_bin_width: int = 1,
+    age_bin_width: int = 2,
     body_bin_width: int = 1,
-    min_n_per_bin: int = 1,
+    min_n_per_bin: int = 30,
     output: Optional[str] = None,
 ) -> Tuple[plt.Figure, Dict[str, Any]]:
+    """Generate a phenotype profile figure and summary metadata.
+
+    Args:
+        df: Input DataFrame.
+        phenotype: Column name of the phenotype to profile.
+        sex_col: Sex column for stratified plots.
+        age_col: Age column for age trend plot.
+        bmi_col: BMI column for body trend plot.
+        height_col: Height column for body trend plot.
+        metadata_dir: Directory containing metadata dictionary files.
+        age_bin_width: Age bin width in years.
+        body_bin_width: Bin width for BMI/height trends.
+        min_n_per_bin: Minimum count required per bin to plot.
+        output: Optional output PDF path.
+
+    Returns:
+        Tuple of (figure, metadata dict).
+
+    Raises:
+        KeyError: If phenotype column is missing.
+    """
 
     if phenotype not in df.columns:
         raise KeyError(f"{phenotype} not found in DataFrame")
@@ -128,7 +149,14 @@ def phenotype_profile(
 # ============================================================
 
 def _standardize_sex(series: Optional[pd.Series]) -> pd.Series | None:
-    """Map common sex encodings to 'Male'/'Female'. Return a Series of labels or series of NA if input is None."""
+    """Map common sex encodings to 'Male'/'Female'.
+
+    Args:
+        series: Sex series or None.
+
+    Returns:
+        Series of standardized labels or None if input is None.
+    """
     if series is None:
         return None
 
@@ -155,6 +183,14 @@ def _standardize_sex(series: Optional[pd.Series]) -> pd.Series | None:
 
 
 def _infer_phenotype_type(series: pd.Series) -> str:
+    """Infer phenotype type from value distribution.
+
+    Args:
+        series: Phenotype series.
+
+    Returns:
+        One of "continuous", "binary", "categorical", or "unknown".
+    """
     s = series.dropna()
     if s.empty:
         return "unknown"
@@ -166,6 +202,16 @@ def _infer_phenotype_type(series: pd.Series) -> str:
 
 
 def _compute_sample_flow(original: pd.DataFrame, working: pd.DataFrame, phenotype: str) -> pd.DataFrame:
+    """Build a simple sample flow table.
+
+    Args:
+        original: Original input DataFrame.
+        working: Working DataFrame after filtering.
+        phenotype: Phenotype column name.
+
+    Returns:
+        DataFrame describing initial, non-missing, and missing counts.
+    """
     return pd.DataFrame([
         {"step": "initial", "n": len(original)},
         {"step": f"non-missing {phenotype}", "n": len(working)},
@@ -181,14 +227,17 @@ def _summarize_demographics(
     ethnicity_col: Optional[str],
     max_decimals: int = 3,
 ) -> pd.DataFrame:
-    """
-    Compute structured demographic summary suitable for formatted rendering.
+    """Compute a demographic summary table.
 
-    Returns a dictionary with:
-        - N
-        - sex breakdown (list of dicts)
-        - age summary (dict)
-        - ethnicity breakdown (list of dicts) if available
+    Args:
+        df: Input DataFrame.
+        sex_col: Sex column name.
+        age_col: Age column name.
+        ethnicity_col: Optional ethnicity column name.
+        max_decimals: Unused legacy arg, kept for compatibility.
+
+    Returns:
+        DataFrame with demographic summary rows.
     """
     rows = []
     N = len(df)
@@ -262,9 +311,19 @@ def _plot_overview(
     metadata_dir: str = "./metadata",
     title: Optional[str] = None,
 ):
-    """
-    Render phenotype metadata into the supplied axes.
-    Shows phenotype info and data dictionary details if available.
+    """Render phenotype metadata and dictionary details into an axes.
+
+    Args:
+        ax: Matplotlib axes.
+        phenotype: Phenotype column name.
+        ptype: Phenotype type label.
+        sample_flow: Sample flow DataFrame.
+        demographics: Demographic summary DataFrame.
+        metadata_dir: Directory containing metadata files.
+        title: Optional title override.
+
+    Returns:
+        The axes object.
     """
 
     # Clear axis
@@ -340,6 +399,12 @@ def _plot_overview(
 
 
 def _plot_sample_flow(ax, sample_flow: pd.DataFrame):
+    """Plot sample flow as a horizontal bar chart.
+
+    Args:
+        ax: Matplotlib axes.
+        sample_flow: Sample flow DataFrame.
+    """
     ax.clear()
     ax.set_title("Sample flow", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
     ax.barh(range(len(sample_flow)), sample_flow["n"], color="C2")
@@ -352,6 +417,12 @@ def _plot_sample_flow(ax, sample_flow: pd.DataFrame):
 
 
 def _plot_completeness(ax, sample_flow: pd.DataFrame):
+    """Plot missing vs non-missing counts for the phenotype.
+
+    Args:
+        ax: Matplotlib axes.
+        sample_flow: Sample flow DataFrame.
+    """
     ax.clear()
     ax.set_title("Phenotype completeness", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
 
@@ -390,6 +461,12 @@ def _plot_completeness(ax, sample_flow: pd.DataFrame):
 
 
 def _plot_demographics(ax, demographics: pd.DataFrame):
+    """Render a demographic summary table.
+
+    Args:
+        ax: Matplotlib axes.
+        demographics: Demographic summary DataFrame.
+    """
     ax.clear()
     ax.axis("off")
     ax.set_title("Demographic summary", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
@@ -419,6 +496,16 @@ def _plot_demographics(ax, demographics: pd.DataFrame):
 
 
 def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: str = "__sex_label"):
+    """Plot phenotype distribution stratified by sex.
+
+    Args:
+        ax: Matplotlib axes.
+        df: Input DataFrame.
+        phenotype: Phenotype column name.
+        field_label: Display label for the phenotype.
+        ptype: Phenotype type label.
+        sex_label_col: Column containing standardized sex labels.
+    """
     ax.clear()
     ax.set_title("Distribution", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
     data = df[phenotype].dropna()
@@ -474,7 +561,7 @@ def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: 
         ax.set_ylabel("Count", fontsize=TEXT_FONTSIZE)
         ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
         ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
     else:
         labels = None
         for label, color in [("Male", COLOR_MALE), ("Female", COLOR_FEMALE)]:
@@ -491,10 +578,21 @@ def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: 
         ax.set_ylabel("Count", fontsize=TEXT_FONTSIZE)
         ax.tick_params(axis="y", labelsize=TEXT_FONTSIZE)
         ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
 def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_width):
+    """Plot mean phenotype by age bins.
+
+    Args:
+        ax: Matplotlib axes.
+        df: Input DataFrame.
+        phenotype: Phenotype column name.
+        field_label: Display label for the phenotype.
+        age_col: Age column name.
+        min_n: Minimum count per bin.
+        age_bin_width: Age bin width in years.
+    """
     ax.clear()
     ax.set_title("Mean by age (binned)", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
 
@@ -535,10 +633,21 @@ def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_widt
     ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
 def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width):
+    """Plot mean phenotype by BMI/height bins.
+
+    Args:
+        ax: Matplotlib axes.
+        df: Input DataFrame.
+        phenotype: Phenotype column name.
+        field_label: Display label for the phenotype.
+        body_col: Body measurement column name.
+        min_n: Minimum count per bin.
+        bin_width: Bin width for the body measurement.
+    """
     # body_col might be None or missing
     ax.clear()
     title = f"Mean by {body_col.split('.')[-1] if body_col else ''} (binned)"
@@ -589,7 +698,5 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width)
     ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
-
-# End of module

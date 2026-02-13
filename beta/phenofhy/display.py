@@ -18,7 +18,14 @@ except Exception:
 
 
 def _normalize_label(s: Any) -> str:
-    """Lowercase, trim, normalize dashes/spaces, basic range word→digit."""
+    """Normalize labels for ordering and comparison.
+
+    Args:
+        s: Input label value.
+
+    Returns:
+        Normalized label string.
+    """
     if s is None or (isinstance(s, float) and np.isnan(s)):
         return ""
     t = str(s).strip().lower()
@@ -56,37 +63,23 @@ def group_filter(
     keep_unlisted_at_end: bool = True,
     drop_label: bool = False,
 ) -> pd.DataFrame:
-    """
-    Build a 4-column Excel-ready table from the categorical output of grouped_trait_statistics().
+    """Build an Excel-ready table from grouped categorical results.
 
-    Returns a DataFrame with columns: ['label', 'N', '%', 'SD'] where:
-      - A trait header row has 'label' = trait title, and N/%/SD empty.
-      - Category rows follow in the specified order with counts/percent/SD.
+    Args:
+        categorical_df: Categorical output from grouped_trait_statistics().
+        group_filter: Optional column->value filter to select a single group.
+        trait_labels: Optional mapping from trait codes to display names.
+        category_order: Optional mapping of trait -> desired category order.
+        exclude_categories: Optional iterable of category labels to hide.
+        round_decimals: Rounding for percentage and SD.
+        show_percent_sign: If True, percent values include a % symbol.
+        na_label: Display label for NaN categories.
+        spacer_between_traits: If True, insert a blank row after each trait block.
+        keep_unlisted_at_end: If True, append unordered categories after ordered ones.
+        drop_label: If True, return only ['N', '%', 'SD'].
 
-    Parameters
-    ----------
-    categorical_df : DataFrame
-        res["categorical"] from grouped_trait_statistics()
-    group_filter : dict, optional
-        Column->value filter to select one group (e.g., {"derived.age_group": "60+"}).
-    trait_labels : dict, optional
-        Mapping from trait codes to pretty names.
-    category_order : dict, optional
-        Desired category order for each trait (list of strings).
-    exclude_categories : iterable, optional
-        Category labels to hide (e.g., ["Do not know","Unknown","Prefer not to answer"]).
-    round_decimals : int
-        Rounding for % and SD.
-    show_percent_sign : bool
-        If True, % strings include a % symbol.
-    na_label : str
-        Display label for NaN categories.
-    spacer_between_traits : bool
-        If True, inserts a blank row after each trait block.
-    keep_unlisted_at_end : bool
-        If True, categories not specified in `category_order[trait]` are appended after ordered ones.
-    drop_label : bool
-        If True, returns only ['N','%','SD'] (no 'label' column).
+    Returns:
+        DataFrame with columns ['label', 'N', '%', 'SD'] or without 'label' if drop_label.
     """
     # empty-fast path
     if categorical_df is None or categorical_df.empty:

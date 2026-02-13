@@ -22,8 +22,9 @@ beta source code (i.e., Python modules).
 
 ## Minimal workflow
 
+
 ```python
-from phenofhy import extract, process, calculate, profile
+from phenofhy import extract, process, calculate, profile, utils
 
 # 1) Extract a small set of fields
 extract.fields(
@@ -53,6 +54,12 @@ report = profile.phenotype_profile(
     df,
     phenotype="derived.age_at_registration",
     output="outputs/reports/age_profile.pdf",
+)
+
+# 5) Upload your results
+report = utils.upload_files(
+   files="outputs/reports/age_profile.pdf",
+   dx_target="results"
 )
 ```
 

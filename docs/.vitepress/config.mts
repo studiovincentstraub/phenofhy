@@ -30,11 +30,17 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Concepts',
+        text: 'Key concepts',
         items: [
           { text: 'Overview', link: '/concepts/overview' },
           { text: 'Data Model', link: '/concepts/data-model' },
           { text: 'Workflow', link: '/concepts/pipeline' },
+        ]
+      },
+      {
+        text: 'Tutorials',
+        items: [
+          { text: 'Overview', link: '/concepts/tutorials' },
         ]
       },
       {

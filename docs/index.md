@@ -17,7 +17,7 @@ hero:
 features:
   - icon: 🖥️
     title: DNAnexus Integration
-    details: Purpose-built for the Our Future Health trusted research environment (TRE) with seamless platform installation and configuration
+    details: Purpose-built for the Our Future Health trusted research environment (TRE) with simple platform installation and configuration
   - icon: 📊
     title: Streamlined Phenotype Preprocessing
     details: Easily extract and preprocess phenotype data in the Our Future Health TRE in a few lines of intuitive code 

@@ -34,6 +34,17 @@ CoalesceRulesMap = Dict[str, CoalesceRuleSpec]  # {out_col: rule}
 # ------------------------------------------------------------------------------------
 
 def load_input(input_data):
+    """Load input data from a file path or DataFrame.
+
+    Args:
+        input_data: File path or pandas DataFrame.
+
+    Returns:
+        Loaded pandas DataFrame.
+
+    Raises:
+        ValueError: If input_data is not a path or DataFrame.
+    """
     if isinstance(input_data, (str, Path)):
         input_path = Path(input_data)
         logger.info("Reading input file: %s", input_path)
@@ -46,13 +57,30 @@ def load_input(input_data):
         
 
 def _dfcol_to_meta_key(col: str) -> str:
-    """'questionnaire.smoke_status_1_1' -> 'SMOKE_STATUS_1_1'."""
+    """Convert a dataframe column name to a codebook key.
+
+    Args:
+        col: Column name like "questionnaire.smoke_status_1_1".
+
+    Returns:
+        Uppercase codebook key like "SMOKE_STATUS_1_1".
+    """
     return col.split(".")[-1].upper()
 
 
 @lru_cache(maxsize=8)
 def _load_codebook(csv_path: str) -> pd.DataFrame:
-    """Load CSV with columns: coding_name, code, meaning."""
+    """Load a codebook CSV.
+
+    Args:
+        csv_path: Path to a CSV with columns coding_name, code, meaning.
+
+    Returns:
+        Cleaned codebook DataFrame.
+
+    Raises:
+        ValueError: If required columns are missing.
+    """
     df = pd.read_csv(csv_path, dtype={"coding_name": "string"})
     df = df.rename(columns={c: c.strip().lower() for c in df.columns})
     required = {"coding_name", "code", "meaning"}
@@ -67,9 +95,15 @@ def _build_maps_for_traits(
     df: pd.DataFrame,
     csv_path: Optional[str],
 ) -> Dict[str, Tuple[Dict[Any, str], Dict[str, Any]]]:
-    """
-    Build code<->label maps from the external codebook for the given traits.
-    Returns {trait: (code_to_label, label_to_code)} for traits present in df & CSV.
+    """Build code/label maps for traits using an external codebook.
+
+    Args:
+        traits: Iterable of trait column names.
+        df: Input DataFrame.
+        csv_path: Optional path to a codebook CSV.
+
+    Returns:
+        Mapping of trait -> (code_to_label, label_to_code).
     """
     out: Dict[str, Tuple[Dict[Any, str], Dict[str, Any]]] = {}
     if not csv_path:
@@ -113,8 +147,21 @@ def resolve_categoricals_and_labels(
     autodetect_coded_categoricals: bool = True,
     autodetect_max_levels: int = 10,
 ) -> Tuple[pd.DataFrame, List[str]]:
-    """
-    Prepare a dataframe and the list of categorical traits for summary.
+    """Prepare a DataFrame and categorical trait list for summary.
+
+    Args:
+        df: Input DataFrame.
+        traits: Trait columns to evaluate.
+        label_mode: "labels" to map codes to labels, or "codes" for reverse.
+        codebook_csv: Optional codebook CSV path.
+        autodetect_coded_categoricals: Whether to infer coded categoricals.
+        autodetect_max_levels: Max unique levels for autodetection.
+
+    Returns:
+        Tuple of (processed DataFrame, categorical trait list).
+
+    Raises:
+        ValueError: If label_mode is invalid.
     """
     tmp = df.copy()
     traits = [t for t in traits if t in tmp.columns]
@@ -158,7 +205,17 @@ def resolve_categoricals_and_labels(
 
 
 def _require_inputs(df: pd.DataFrame, name: str, *, all_of: Optional[List[str]], any_of: Optional[List[str]]) -> None:
-    """Strictly enforce input presence for a selected derivation."""
+    """Strictly enforce input presence for a selected derivation.
+
+    Args:
+        df: Input DataFrame.
+        name: Derivation name.
+        all_of: Columns that must all be present.
+        any_of: At least one of these columns must be present.
+
+    Raises:
+        KeyError: If required columns are missing.
+    """
     cols = set(df.columns)
     if all_of:
         missing = set(all_of) - cols
@@ -181,6 +238,14 @@ DERIVE_ENTITY_OVERRIDES: Dict[str, str] = {
 }
 
 def _columns_for_spec(spec: Dict[str, object]) -> List[str]:
+    """Extract input column names from a derive spec.
+
+    Args:
+        spec: Derive spec containing optional all_of/any_of lists.
+
+    Returns:
+        List of column names referenced by the spec.
+    """
     cols: List[str] = []
     for k in ("all_of", "any_of"):
         v = spec.get(k)  # type: ignore
@@ -194,7 +259,16 @@ def _select_derives_for_entity(
     *,
     overrides: Optional[Dict[str, str]] = None,
 ) -> List[str]:
-    """Select derives whose inputs fully belong to the given entity, plus explicit overrides."""
+    """Select derives whose inputs belong to a given entity.
+
+    Args:
+        entity: Entity name prefix.
+        registry: Derive registry mapping.
+        overrides: Optional explicit entity overrides.
+
+    Returns:
+        Sorted list of derive names for the entity.
+    """
     
     pref = f"{entity}."
     selected = []
@@ -223,11 +297,14 @@ def _select_derives_for_entity(
     return selected
 
 def _spec_ready(df: pd.DataFrame, spec: Dict[str, Any]) -> bool:
-    """
-    Is this derivation runnable given what's in df *right now*?
-    - all_of: must all be present
-    - any_of: at least one present
-    - ready (callable): optional custom readiness check
+    """Check whether a derivation spec is runnable on the DataFrame.
+
+    Args:
+        df: Input DataFrame.
+        spec: Derive specification with all_of/any_of/ready.
+
+    Returns:
+        True if the spec can run with current inputs.
     """
     cols = set(df.columns)
     all_of = spec.get("all_of")
@@ -250,12 +327,16 @@ def _run_derivations_auto(
     selected: List[str],
     registry: Dict[str, DeriveSpec],
 ) -> pd.DataFrame:
-    """
-    Opportunistic execution:
-      - repeatedly run any derives that are "ready" (inputs present),
-        updating df each time; stop when no progress is possible.
-      - never raises for missing inputs; simply skips unready derives.
-    """
+        """Run derivations opportunistically as inputs become available.
+
+        Args:
+                df: Input DataFrame.
+                selected: Derive names to attempt.
+                registry: Derive registry mapping.
+
+        Returns:
+                DataFrame with applied derivations.
+        """
     remaining = list(selected)
     made_progress = True
     out = df
@@ -281,9 +362,19 @@ def _run_derivations_strict(
     selected: List[str],
     registry: Dict[str, DeriveSpec],
 ) -> pd.DataFrame:
-    """
-    Strict execution:
-      - raises KeyError when a selected derive is missing required inputs.
+    """Run derivations strictly, raising if inputs are missing.
+
+    Args:
+        df: Input DataFrame.
+        selected: Derive names to apply.
+        registry: Derive registry mapping.
+
+    Returns:
+        DataFrame with applied derivations.
+
+    Raises:
+        KeyError: If required inputs are missing.
+        ValueError: If unknown derive names are provided.
     """
     if not selected:
         return df
@@ -309,12 +400,19 @@ def _resolve_selected_derives(
     registry: Dict[str, DeriveSpec],
     overrides: Optional[Dict[str, str]] = None,
 ) -> List[str]:
-    """
-    Selection semantics:
-      - derive=False or None     -> []
-      - derive=True or "all"     -> list(registry.keys())
-      - derive="auto"            -> only derives relevant to `entity`
-      - derive=[...]             -> explicit subset (validated later)
+    """Resolve derive selection based on a policy.
+
+    Args:
+        derive: Selection policy.
+        entity: Entity name.
+        registry: Derive registry mapping.
+        overrides: Optional entity overrides.
+
+    Returns:
+        List of derive names to apply.
+
+    Raises:
+        ValueError: If derive selection is invalid.
     """
     if derive is False or derive is None:
         return []
@@ -346,8 +444,27 @@ def _entity_fields_core(
     extra_exprs: Optional[List[str]] = None,
     keep_na_in_ranges: bool = False,
 ) -> pd.DataFrame:
-    """
-    Load → clean → (optionally) floor age → derive (scoped to `entity`) → (optionally) filter → (optionally) coalesce.
+    """Core entity processing pipeline.
+
+    Args:
+        input_data: File path or DataFrame input.
+        entity: Entity name.
+        derive: Derivation selection policy.
+        derive_registry: Optional custom derive registry.
+        coalesce_rules: Optional coalesce rule overrides.
+        auto_row_filters: Whether to apply age-based filtering.
+        age_col: Age column for filtering.
+        min_age: Minimum age inclusive.
+        max_age: Maximum age inclusive.
+        age_group_bins: Optional custom age bins.
+        age_group_labels: Optional custom age labels.
+        floor_age: Whether to floor age values before deriving.
+        extra_ranges: Optional extra numeric ranges for filtering.
+        extra_exprs: Optional query expressions for filtering.
+        keep_na_in_ranges: Whether to keep NA rows during range filters.
+
+    Returns:
+        Processed DataFrame.
     """
     # 1) Load & clean
     df = load_input(input_data)
@@ -420,6 +537,21 @@ def get_dummies(
     user_map: Optional[Dict[str, str]] = None,
     inplace: bool = True,
 ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]:
+    """Expand a coded multi-select column into dummy variables.
+
+    Args:
+        df: Input DataFrame.
+        codings_glob: Glob path to codings CSVs.
+        coding_name: Coding name to match within codings CSVs.
+        col: Column containing the coded values.
+        prefix: Prefix for generated dummy columns.
+        exclude_codes: Codes to exclude from expansion.
+        user_map: Optional code->label map overrides.
+        inplace: Whether to modify df in place.
+
+    Returns:
+        Updated DataFrame (and mapping DataFrame if expand returns it).
+    """
     mapping_df = expand_multi_code_column(
         df=df,
         codings_glob=codings_glob,
@@ -450,6 +582,27 @@ def participant_fields(
     extra_exprs: Optional[List[str]] = None,
     keep_na_in_ranges: bool = False,
 ) -> pd.DataFrame:
+    """Process participant entity fields with optional derives and filters.
+
+    Args:
+        input_data: File path or DataFrame input.
+        derive: Derivation selection policy.
+        derive_registry: Optional custom derive registry.
+        coalesce_rules: Optional coalesce rule overrides.
+        auto_row_filters: Whether to apply age-based filtering.
+        age_col: Age column for filtering.
+        min_age: Minimum age inclusive.
+        max_age: Maximum age inclusive.
+        floor_age: Whether to floor age values before deriving.
+        age_group_bins: Optional custom age bins.
+        age_group_labels: Optional custom age labels.
+        extra_ranges: Optional extra numeric ranges for filtering.
+        extra_exprs: Optional query expressions for filtering.
+        keep_na_in_ranges: Whether to keep NA rows during range filters.
+
+    Returns:
+        Processed DataFrame.
+    """
     return _entity_fields_core(
         input_data,
         entity="participant",
@@ -485,10 +638,24 @@ def questionnaire_fields(
     extra_exprs: Optional[List[str]] = None,
     keep_na_in_ranges: bool = False,
 ) -> pd.DataFrame:
-    """
-    Questionnaire-focused processing:
-      - By default (derive='auto'): derive vape_status, smoke_status_v1/v2, walk_16_10 when inputs exist.
-      - Age filtering is OFF by default (can enable if desired).
+    """Process questionnaire entity fields with optional derives.
+
+    Args:
+        input_data: File path or DataFrame input.
+        derive: Derivation selection policy.
+        derive_registry: Optional custom derive registry.
+        coalesce_rules: Optional coalesce rule overrides.
+        auto_row_filters: Whether to apply age-based filtering.
+        age_col: Age column for filtering.
+        min_age: Minimum age inclusive.
+        max_age: Maximum age inclusive.
+        floor_age: Whether to floor age values before deriving.
+        extra_ranges: Optional extra numeric ranges for filtering.
+        extra_exprs: Optional query expressions for filtering.
+        keep_na_in_ranges: Whether to keep NA rows during range filters.
+
+    Returns:
+        Processed DataFrame.
     """
     return _entity_fields_core(
         input_data,
@@ -523,9 +690,24 @@ def clinic_measurements_fields(
     extra_exprs: Optional[List[str]] = None,
     keep_na_in_ranges: bool = False,
 ) -> pd.DataFrame:
-    """
-    Clinic measurements–focused processing:
-      - By default (derive='auto'): derive BMI/BMI_status when inputs exist.
+    """Process clinic measurements fields with optional BMI derives.
+
+    Args:
+        input_data: File path or DataFrame input.
+        derive: Derivation selection policy.
+        derive_registry: Optional custom derive registry.
+        coalesce_rules: Optional coalesce rule overrides.
+        auto_row_filters: Whether to apply age-based filtering.
+        age_col: Age column for filtering.
+        min_age: Minimum age inclusive.
+        max_age: Maximum age inclusive.
+        floor_age: Whether to floor age values before deriving.
+        extra_ranges: Optional extra numeric ranges for filtering.
+        extra_exprs: Optional query expressions for filtering.
+        keep_na_in_ranges: Whether to keep NA rows during range filters.
+
+    Returns:
+        Processed DataFrame.
     """
     return _entity_fields_core(
         input_data,
@@ -549,6 +731,14 @@ def clinic_measurements_fields(
 # ------------------------------------------------------------------------------------
 
 def _normalize_codes(x):
+    """Normalize ICD codes into a list of strings.
+
+    Args:
+        x: Single code, list of codes, or stringified list.
+
+    Returns:
+        List of cleaned string codes.
+    """
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return []
     if isinstance(x, list):
@@ -560,6 +750,18 @@ def _normalize_codes(x):
 
 
 def _traits_to_codes(traits_and_codes):
+    """Convert trait/code inputs into a normalized mapping.
+
+    Args:
+        traits_and_codes: Dict, DataFrame with columns ['trait','ICD_code'],
+            or (traits, codes) aligned sequences.
+
+    Returns:
+        Mapping of trait to a deduped list of codes.
+
+    Raises:
+        ValueError: If the input format is unsupported or missing columns.
+    """
     if isinstance(traits_and_codes, Mapping):
         items = traits_and_codes.items()
     elif isinstance(traits_and_codes, pd.DataFrame):

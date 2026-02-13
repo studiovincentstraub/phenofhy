@@ -1,7 +1,6 @@
-"""
-Default coalescing rules for common traits.
+"""Default coalescing rules for common traits.
 
-Edit/extend DEFAULT_COALESCE_RULES as new questionnaire traits are added.
+Edit or extend DEFAULT_COALESCE_RULES as new questionnaire traits are added.
 Import this dict in preprocess.py and pass it to process_fields by default.
 """
 
@@ -21,6 +20,14 @@ CoalesceConfig = Dict[str, CoalesceRule]
 
 
 def _default_normalize(x):
+    """Normalize a value for coalescing.
+
+    Args:
+        x: Input value.
+
+    Returns:
+        Normalized value with empty strings converted to NA.
+    """
     if isinstance(x, str):
         x = x.strip()        # REMOVE .lower()
         if x == "":
@@ -39,43 +46,22 @@ def rule_cat(
     missing: str = "nan",
     preserve_dtype: bool = True,
 ) -> CoalesceRule:
-    """
-    Build a **categorical** coalescing rule for `coalesce_traits`.
+    """Build a categorical coalescing rule for coalesce_traits.
 
-    This is a convenience wrapper to avoid writing verbose rule dicts. It produces a rule
-    that (1) optionally normalizes/canonicalizes values via `value_map`, (2) decides which
-    values are informative, (3) merges multiple source columns in priority order, and
-    (4) handles non-response values (collapse or distinguish).
+    Args:
+        sources: Ordered list of source columns to coalesce.
+        informative: Iterable of informative values. If omitted, non-null values not
+            in nonresponse are treated as informative.
+        value_map: Optional mapping to canonicalize labels or convert codes to labels.
+        nonresponse: Values considered non-informative.
+        collapse: If True, collapse non-informative values to unknown.
+        priority: "first" or "last" to pick which source wins on ties.
+        unknown: Label used for collapsed non-informative values.
+        missing: Label used when collapse is False and all sources are NA.
+        preserve_dtype: If True, preserve or extend categorical dtype categories.
 
-    Parameters
-    ----------
-    sources : Iterable[str]
-        Ordered list of source columns to coalesce (left → right priority).
-    informative : Iterable, optional
-        Set of allowed/canonical values that count as informative. If omitted, any
-        non-null value not in `nonresponse` is treated as informative.
-    value_map : dict, optional
-        Mapping applied AFTER your pipeline’s normalization to canonicalize labels or
-        convert codes → labels (e.g., {1:"Male", 2:"Female", 3:"Intersex"}).
-    nonresponse : Iterable, optional
-        Values considered non-informative (e.g., {"unknown","prefer not to answer"}).
-    collapse : bool, default True
-        If True, all non-informative results become `unknown`. If False, rows where
-        *all* sources are NA become `nan`, and other junk becomes `unknown`.
-    priority : {"first","last"}, default "last"
-        Tie-breaker if two sources are informative (should be rare). "last" prefers
-        the rightmost source (e.g., V2 over V1). "first" prefers the leftmost.
-    unknown : str, default "unknown"
-        Label used when collapsing non-informative values.
-    missing : str, default "nan"
-        Label used when `collapse=False` and all sources are NA.
-    preserve_dtype : bool, default True
-        If any source is a pandas Categorical, preserve/extend its categories.
-
-    Returns
-    -------
-    dict
-        A rule dict compatible with `coalesce_traits`.
+    Returns:
+        Rule dict compatible with coalesce_traits.
     """
     rule: CoalesceRule = {
         "sources": list(sources),
@@ -102,32 +88,16 @@ def rule_num(
     astype: str = "Int64",
     priority: str = "last",
 ) -> CoalesceRule:
-    """
-    Build a **numeric** coalescing rule for `coalesce_traits`.
+    """Build a numeric coalescing rule for coalesce_traits.
 
-    Numeric rules use a predicate to decide if a value is informative (e.g., finite and
-    within a plausible range). Non-informative values are left as NA so downstream numeric
-    summaries handle missingness naturally.
+    Args:
+        sources: Ordered list of source columns to coalesce.
+        informative: Optional predicate for valid values.
+        astype: Final dtype cast for the derived column.
+        priority: "first" or "last" to pick which source wins on ties.
 
-    Parameters
-    ----------
-    sources : Iterable[str]
-        Ordered list of source columns to coalesce (left → right priority).
-    informative : callable(v)->bool, optional
-        Predicate returning True for valid/usable values. If omitted, defaults to:
-        `lambda v: pd.notna(v) and np.isfinite(v)`.
-        You can close over bounds, e.g.:
-        `lambda v, lo=5, hi=100: pd.notna(v) and np.isfinite(v) and lo <= float(v) <= hi`.
-    astype : str, default "Int64"
-        Final dtype cast for the derived column (e.g., "Int64", "Float64", "float64").
-    priority : {"first","last"}, default "last"
-        Tie-breaker if two sources are informative (rare). "last" prefers the rightmost
-        source (e.g., V2 over V1). "first" prefers the leftmost.
-
-    Returns
-    -------
-    dict
-        A rule dict compatible with `coalesce_traits`.
+    Returns:
+        Rule dict compatible with coalesce_traits.
     """
     if informative is None:
         informative = lambda v: (pd.notna(v) and np.isfinite(v))
@@ -147,10 +117,16 @@ def coalesce_traits(
     global_unknown_label: str = "Unknown",
     global_missing_label: str = "nan",
 ) -> pd.DataFrame:
-    """
-    Coalesce versioned columns into unified traits using 'informative-first' logic.
+    """Coalesce versioned columns into unified traits.
 
-    See original docstring for parameter schema.
+    Args:
+        df: Input dataframe.
+        rules: Mapping of output column to coalescing rule.
+        global_unknown_label: Default unknown label for categorical outputs.
+        global_missing_label: Default missing label for categorical outputs.
+
+    Returns:
+        DataFrame with unified traits added.
     """
     out = df.copy()
 
@@ -323,11 +299,17 @@ def coalesce_traits(
     
 def build_rules(overrides: CoalesceConfig | None = None,
                extend: CoalesceConfig | None = None) -> CoalesceConfig:
-    """
-    Return a rules dict combining defaults with user changes.
+    """Combine default coalescing rules with user overrides.
 
-    - overrides: replace/modify existing default rules by key.
-    - extend: add entirely new derived outputs.
+    Args:
+        overrides: Replace or modify existing default rules by key.
+        extend: Add entirely new derived outputs.
+
+    Returns:
+        Combined rules dictionary.
+
+    Raises:
+        KeyError: If extend conflicts with an existing rule key.
     """
     rules = dict(DEFAULT_COALESCE_RULES)
     if overrides:

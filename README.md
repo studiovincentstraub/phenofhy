@@ -19,6 +19,12 @@ and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is 
 - Teams working inside the OFH TRE who need a repeatable preprocessing workflow.
 - Analysts creating quick QA summaries and phenotype profile reports before GWAS.
 
+## Environment
+
+Phenofhy is designed to run inside the OFH TRE with DNAnexus tooling and
+JupyterLab. It can be used on simulated data outside the TRE for local testing,
+but the main workflows assume access to OFH datasets and the `dx` toolkit.
+
 ## Installation (TRE)
 
 Phenofhy is currently a beta package for the OFH TRE. There is no automated
@@ -35,11 +41,47 @@ Tip: when you upload the package, avoid nesting `Phenofhy` inside another
 `Phenofhy` folder. The TRE should contain a single `Phenofhy/` directory that
 includes the beta modules, which can be optionally nested inside a `applets/` folder.
 
-## Environment
+## Example workflow
 
-Phenofhy is designed to run inside the OFH TRE with DNAnexus tooling and
-JupyterLab. It can be used on simulated data outside the TRE for local testing,
-but the main workflows assume access to OFH datasets and the `dx` toolkit.
+```python
+from phenofhy import extract, process, calculate, profile, utils
+
+# 1) Extract a small set of fields
+extract.fields(
+    output_file="outputs/raw/phenos.csv",
+    fields=[
+        "participant.registration_year",
+        "participant.registration_month",
+        "participant.birth_year",
+        "participant.birth_month",
+        "participant.demog_sex_2_1",
+        "questionnaire.smoke_status_2_1",
+    ],
+)
+
+# 2) Process participant data (derives age, sex, age_group)
+df = process.participant_fields("outputs/raw/phenos.csv")
+
+# 3) Summaries
+summary = calculate.summary(
+    df,
+    traits=["derived.age_at_registration", "derived.sex"],
+    stratify="derived.sex",
+)
+
+# 4) Profile report
+report = profile.phenotype_profile(
+    df,
+    phenotype="derived.age_at_registration",
+    output="outputs/reports/age_profile.pdf",
+)
+
+# 5) Upload your results
+report = utils.upload_files(
+   files="outputs/reports/age_profile.pdf",
+   dx_target="results"
+)
+```
 
 ## Documentation
 

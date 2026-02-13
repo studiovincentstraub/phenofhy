@@ -20,8 +20,13 @@ Use entity-specific helpers to clean and derive fields:
 
 ## 4) Summarize
 
-Use `calculate.summary()` or `calculate.prevalence()` to create tables for QA or reporting.
+Use `calculate.summary()` or `calculate.prevalence()` to create tables for QC or reporting.
 
 ## 5) Profile
 
 Use `profile.phenotype_profile()` to produce a lightweight pre-GWAS phenotype report.
+
+
+## 6) Upload
+
+Use `utils.upload_files()` to upload any reports, figures, or tables to your TRE project.

@@ -9,13 +9,17 @@ from pathlib import Path
 
 
 def get_dataset_id(project: str | None = None, full: bool = True) -> str:
-    """
-    Return the DNAnexus dataset identifier.
+    """Return the DNAnexus dataset identifier.
 
-    If full is True (default) returns "{project}:{record_id}" for the first
-    DNAnexus Dataset found. Uses DX_PROJECT_CONTEXT_ID if project isn't provided.
+    Args:
+        project: DNAnexus project ID. Defaults to DX_PROJECT_CONTEXT_ID.
+        full: If True, return "{project}:{record_id}". If False, return project ID.
 
-    If full is False returns only the project id (project or DX_PROJECT_CONTEXT_ID).
+    Returns:
+        Dataset identifier string.
+
+    Raises:
+        RuntimeError: If project is not available.
     """
     proj = project or os.environ.get("DX_PROJECT_CONTEXT_ID")
     if not proj:
@@ -40,19 +44,16 @@ def get_dataset_id(project: str | None = None, full: bool = True) -> str:
 
 
 def connect_to_dataset(cohort_record_id: str = ""):
-    """
-    Connect to a DNAnexus dataset or cohort in the current project.
+    """Connect to a DNAnexus dataset or cohort.
 
-    Parameters
-    ----------
-    cohort_record_id : str, optional
-        Record ID of a cohort dataset. If empty (default), the function
-        connects to the first dataset found in the current project.
+    Args:
+        cohort_record_id: Optional cohort record ID. If empty, loads first dataset.
 
-    Returns
-    -------
-    dxdata.Dataset or dxdata.Cohort
-        Loaded DNAnexus dataset (whole cohort) or cohort.
+    Returns:
+        Loaded dxdata.Dataset or dxdata.Cohort.
+
+    Raises:
+        RuntimeError: If DX_PROJECT_CONTEXT_ID is not set.
     """
     project = os.environ.get("DX_PROJECT_CONTEXT_ID")
     if not project:
@@ -69,16 +70,15 @@ def connect_to_dataset(cohort_record_id: str = ""):
 
 
 def find_latest_dx_file_id(name_pattern: str, folder: str = None, project: str = None) -> str:
-    """
-    Find the file ID of the most recently created DNAnexus file matching a name pattern.
+    """Find the latest DNAnexus file ID matching a name pattern.
 
     Args:
-        name_pattern (str): Filename or glob pattern (e.g., 'config.json', '*.csv').
-        folder (str, optional): DNAnexus folder path.
-        project (str, optional): DNAnexus project ID.
+        name_pattern: Filename or glob pattern.
+        folder: Optional DNAnexus folder path.
+        project: Optional DNAnexus project ID.
 
     Returns:
-        str: File ID (e.g., 'file-xxxx').
+        File ID string (e.g., "file-xxxx").
 
     Raises:
         FileNotFoundError: If no file is found.
@@ -103,11 +103,10 @@ def find_latest_dx_file_id(name_pattern: str, folder: str = None, project: str =
     
     
 def create_folder_if_not_exists(dx_folder_path):
-    """
-    Creates a folder in the specified DNAnexus project path if it doesn't exist already.
-    
-    Parameters:
-    - dx_folder_path: Path where the folder should be created in the project.
+    """Create a DNAnexus folder if it does not exist.
+
+    Args:
+        dx_folder_path: DNAnexus folder path to create.
     """
     command = f"dx mkdir -p {dx_folder_path}"  # Use `-p` to create parent folders as needed
     print(f"Running command: {command}")
@@ -115,15 +114,13 @@ def create_folder_if_not_exists(dx_folder_path):
     
 
 def download_files(files):
-    """
-    Download files from DNAnexus using dx download.
+    """Download files from DNAnexus.
 
-    Parameters:
-    - files (tuple or list):
-        • A single (file_id, output_path) tuple, OR
-        • A list of (file_id, output_path) tuples
+    Args:
+        files: A (file_id, output_path) tuple or list of such tuples.
 
-    Each output_path can include a filename (e.g., "out_dir/myfile.txt").
+    Raises:
+        ValueError: If input format is invalid.
     """
     # Normalize input
     if isinstance(files, tuple) and len(files) == 2:
@@ -146,15 +143,14 @@ def download_files(files):
 
         
 def upload_files(files, dx_target="results"):
-    """
-    Upload files to DNAnexus using dx upload.
+    """Upload files to DNAnexus.
 
-    Parameters:
-    - files (str or list):
-        • A single file path as string, or
-        • A list of file paths, or
-        • A list of (file_path, dx_folder) tuples.
-    - dx_target (str): Default DNAnexus folder to upload to.
+    Args:
+        files: File path, list of paths, or list of (path, dx_folder) tuples.
+        dx_target: Default DNAnexus folder.
+
+    Raises:
+        ValueError: If input format is invalid.
     """
     # Normalize input
     if isinstance(files, str):
@@ -177,15 +173,14 @@ def upload_files(files, dx_target="results"):
 
             
 def upload_folders(folders, dx_target="results"):
-    """
-    Upload one or more folders to DNAnexus using dx upload.
+    """Upload one or more folders to DNAnexus.
 
-    Parameters:
-    - folders (str or list): 
-        - A single folder (str), OR 
-        - A list of folders (["local1", "local2"]), OR 
-        - A list of (local, dx_target) pairs [("local1", "dx/target1"), ...]
-    - dx_target (str): Default DNAnexus folder to upload to (used if not overridden per-folder)
+    Args:
+        folders: Folder path, list of paths, or list of (path, dx_target) tuples.
+        dx_target: Default DNAnexus folder.
+
+    Raises:
+        ValueError: If input format is invalid.
     """
     if isinstance(folders, str):
         folders = [(folders, dx_target)]
@@ -209,33 +204,17 @@ def upload_folders(folders, dx_target="results"):
 
 # Load a file based on its file type (json, txt, csv, tsv, xlsx, etc.)
 def load_file(file_path):
-    """
-    Load a file from the given path based on its extension.
+    """Load a file by extension into a Python object.
 
-    Supported file types:
-    - .json → returns parsed JSON object
-    - .txt → returns comma-separated string (line-separated values become a CSV-like string)
-    - .csv → returns pandas DataFrame
-    - .tsv → returns pandas DataFrame (tab-separated)
-    - .xlsx → returns pandas DataFrame (Excel)
-
-    Parameters:
-    ----------
-    file_path : str or Path
-        The full path to the file to load.
+    Args:
+        file_path: Path to the file.
 
     Returns:
-    -------
-    Loaded object:
-        - dict for .json
-        - str for .txt
-        - pd.DataFrame for .csv, .tsv, .xlsx
-        - None for unsupported file types
+        Loaded object: dict for JSON, str for TXT, DataFrame for CSV/TSV/XLSX,
+        or None for unsupported types.
 
     Raises:
-    ------
-    Exception:
-        If reading the file fails, logs an error and re-raises the exception.
+        Exception: If reading the file fails.
     """
     try:
         file_extension = Path(file_path).suffix.lower()

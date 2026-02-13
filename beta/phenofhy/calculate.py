@@ -312,19 +312,35 @@ def summary(
     sex_keep: Optional[Dict[Any, str]] = None,
     granularity: Literal["variable", "category"] = "variable",
 ):
-    """
-    Compute grouped summaries.
+    """Compute grouped summaries for numeric and categorical traits.
 
-    - If stratify is None: compute for whole sample (no sample column).
-    - If stratify is a column name string: compute per-value of that column (all observed values).
-    - If stratify is a single-key dict {col: [vals,...]}: compute per those values (subset).
-      * allowed values are intersected with values actually present in the data.
-    - granularity='variable' -> one row per variable (aggregate).
-      granularity='category' -> one row per category/value (disaggregate).
-    - Skips columns ending with '.pid'.
-    - Uses codebook (codebook_csv) for mapping when provided and local derived codebook
-      (DERIVED_CODEBOOK) if available.
-    - Uses data_dictionary_csv to get human-readable descriptions for `trait`.
+    Args:
+        df: Input dataframe with participant/questionnaire/derived columns.
+        traits: Optional iterable of column names to summarize. If None, auto-detects
+            usable columns and skips ones ending with '.pid'.
+        stratify: None for whole-sample summary, a column name to stratify by, or a
+            single-key dict {col: [values]} to restrict strata.
+        sex_col: Column name for sex (used for default age group derivation).
+        age_col: Column name for age (used for default age group derivation).
+        age_bins: Optional dict with keys "bins" and "labels" for age groupings.
+        round_decimals: Number of decimals to round numeric outputs.
+        categorical_traits: Optional iterable of traits to treat as categorical.
+        label_mode: "labels" to map codes to labels, "codes" to keep codes.
+        codebook_csv: Optional path to codings CSV; if None, resolved from metadata_dir.
+        metadata_dir: Directory to search for codings and metadata files.
+        data_dictionary_csv: Optional path to data dictionary CSV for trait descriptions.
+        local_codebook: Optional mapping of derived column name to {code: label}.
+        autodetect_coded_categoricals: Whether to auto-detect small-cardinality
+            numeric categoricals.
+        autodetect_max_levels: Max unique values to treat numeric as categorical.
+        autodetect_exclude: Optional iterable of traits to exclude from auto-detect.
+        sex_keep: Optional mapping to recode/keep sex values (currently unused).
+        granularity: "variable" for aggregated rows, "category" for per-category rows.
+
+    Returns:
+        Dict with two DataFrames:
+            - "numeric": numeric summary table.
+            - "categorical": categorical summary table.
     """
     tmp = df.copy()
 
@@ -1000,12 +1016,28 @@ def prevalence(
     on_missing: Literal["warn", "ignore", "error"] = "warn",
     error_if_empty: bool = False,
 ) -> pd.DataFrame:
-    """
-    Compute prevalence including support for derived.* columns, a 'meaning' column,
-    skip columns ending with '.pid', and add a binary 'derived' flag (1/0).
+    """Compute prevalence counts and rates for coded/derived categorical traits.
 
-    NOTE: coding_name in results is always the original column name (entity.coding_name),
-    not the uppercase codebook key.
+    Args:
+        df: Input dataframe with participant/questionnaire/derived columns.
+        codings: Codings mapping (DataFrame/dict/list) or None to resolve from
+            metadata_dir/codebook_csv.
+        traits: Optional traits to include; if None, all non-helper columns are used.
+        denominator: "all" for total participants or "nonmissing" per trait.
+        denominators: Optional iterable of additional denominator keys; if provided,
+            output includes prevalence per key.
+        eligibility: Optional mapping of eligibility name to column or list of columns
+            used for custom denominators.
+        wide_output: If True, return wide columns for each denominator key.
+        participant_col: Column name for participant id.
+        metadata_dir: Directory to search for codings CSV if not provided.
+        codebook_csv: Optional path to codings CSV.
+        on_missing: Behavior when metadata is missing (warn/ignore/error).
+        error_if_empty: If True, raise when no results are produced.
+
+    Returns:
+        A DataFrame with prevalence counts and rates. Shape depends on denominator
+        arguments and wide_output.
     """
     import logging
     logger = logging.getLogger(__name__)
@@ -1341,23 +1373,26 @@ def medication_prevalence(
     metadata_dir: str = "./metadata",
     codebook_csv: Optional[str] = None,
 ):
-    """
-    Compute medication prevalence.
+    """Compute medication prevalence for coded medication traits.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Questionnaire/participant dataframe (fully-qualified columns).
-    codings : DataFrame/dict/list or None
-        Codings mapping. If None, function will try to resolve a '*.codings.csv'
-        from metadata_dir or use codebook_csv if provided.
-    medication_phenotypes : flexible (DataFrame / list / dict)
-        Specification of medication phenotypes. Coerced into rows of (trait, coding_name, medication).
-    Other args: denominator, return_what, fuzzy matching, etc.
+    Args:
+        df: Questionnaire/participant dataframe (fully-qualified columns).
+        codings: Codings mapping (DataFrame/dict/list) or None to resolve from
+            metadata_dir/codebook_csv.
+        medication_phenotypes: Flexible specification of medication phenotypes. Each
+            row resolves to (trait, coding_name, medication).
+        participant_col: Column name for participant id.
+        denominator: "all" or "nonmissing" for prevalence denominator.
+        return_what: "both" for per-medication and grouped, or one of
+            "per_medication"/"group".
+        fuzzy: Whether to use fuzzy matching for medication meanings.
+        fuzzy_cutoff: Similarity cutoff for fuzzy matching.
+        metadata_dir: Directory to search for codings CSV if not provided.
+        codebook_csv: Optional path to codings CSV.
 
-    Returns
-    -------
-    per_med_df, group_df   (or one of them depending on return_what)
+    Returns:
+        Either a per-medication DataFrame, a grouped DataFrame, or both depending
+        on return_what.
     """
     logger = logging.getLogger(__name__)
 
@@ -1586,27 +1621,19 @@ def medication_summary(
     inplace: bool = True,
     return_summary: bool = False,
 ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.DataFrame]]:
-    """
-    Derive medication usage-pattern variables from binary domain flags and
-    optionally return a compact summary DataFrame describing the new variables.
+        """Derive medication usage-pattern variables and optional summary.
 
-    Notes
-    -----
-    - Accepts either a pandas DataFrame or a (mapping_df, df) tuple (to be robust
-      against callers that previously returned (mapping, df) tuples).
-    - If `inplace=True` the supplied DataFrame is mutated and also returned. If
-      False, a shallow copy is created and returned.
-    - When `return_summary=True`, a second returned object is a DataFrame with
-      one row per derived variable and the following columns:
-        - var: column name
-        - meaning: short human-friendly description
-        - var_type: 'binary' or 'continuous'
-        - mean: numeric mean (or proportion for binary)
-        - std: sample std (NaN for many binaries)
-        - mode: most frequent value (where sensible)
-        - n_nonmissing: number of non-missing values
-        - n_missing: number of missing rows
-    """
+        Args:
+                df: Input dataframe or a (mapping_df, df) tuple (compatibility).
+                med_prefix: Prefix used to detect medication domain columns.
+                group_map: Mapping of grouped medication flags to constituent columns.
+                inplace: If True, mutate the input dataframe; otherwise return a copy.
+                return_summary: If True, also return a summary DataFrame of derived vars.
+
+        Returns:
+                If return_summary is False, returns the mutated or copied DataFrame.
+                If return_summary is True, returns (df, summary_df).
+        """
     # Robustly accept (mapping_df, df) tuples
     if isinstance(df, tuple) and len(df) == 2 and isinstance(df[1], pd.DataFrame):
         # treat second element as df (common caller pattern)
@@ -1818,13 +1845,18 @@ def _binarize_series(s: pd.Series):
 
 
 def matthews_corrcoef_series(a: pd.Series, b: pd.Series) -> float:
-    """
-    Compute Matthews correlation coefficient (phi) between two pandas Series.
+    """Compute Matthews correlation coefficient (phi) for two series.
 
-    - Both inputs are binarized via _binarize_series (if they have <=2 unique non-NA values).
-    - If either is not binary after checking, raises ValueError.
-    - If denominator of phi formula is zero (degenerate confusion matrix),
-      attempt to return Pearson on the binary-mapped arrays; if that fails, return 0.0.
+    Args:
+        a: Series to compare (binarized if needed).
+        b: Series to compare (binarized if needed).
+
+    Returns:
+        Phi coefficient as a float in [-1, 1]. If the confusion matrix is
+        degenerate, returns Pearson on the binarized arrays or 0.0.
+
+    Raises:
+        ValueError: If either series is not binary-like after binarization.
     """
     a_bin, a_is_bin = _binarize_series(a)
     b_bin, b_is_bin = _binarize_series(b)
@@ -1869,16 +1901,18 @@ def phi_corr(
     outdir: Optional[str] = None,
     save_basename: str = "phi_corr",
 ) -> pd.DataFrame:
-    """
-    Compute a symmetric Pearson correlation matrix suitable for heatmaps.
+    """Compute a Pearson correlation matrix suitable for heatmaps.
 
-    - Uses Pearson's r for every pair (this reproduces Pearson for continuous-continuous,
-      point-biserial for continuous-binary, and Phi for binary-binary when binaries are 0/1).
-    - Each pairwise correlation is computed on the intersection of non-missing samples.
-    - If the pairwise overlap has < 2 samples or either variable is constant on the overlap,
-      the correlation is set to 0.0 (stable, avoids NaN).
-    - If vars_for_heatmap is None, default: all med_prefix cols + common usage-pattern vars (if present).
-    - Returns DataFrame (index & columns = vars_for_heatmap) of floats in [-1, 1].
+    Args:
+        df: Input dataframe.
+        vars_for_heatmap: Optional iterable of columns to include. If None, uses
+            medication prefix columns plus common usage-pattern vars.
+        med_prefix: Prefix used to select medication columns when vars_for_heatmap is None.
+        outdir: Optional directory to save CSV/parquet outputs.
+        save_basename: Basename for saved outputs if outdir is provided.
+
+    Returns:
+        A square DataFrame of correlations in [-1, 1], indexed by vars_for_heatmap.
     """
     # choose variables if not provided
     if vars_for_heatmap is None:

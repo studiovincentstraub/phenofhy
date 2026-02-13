@@ -23,6 +23,20 @@ logging.basicConfig(level=logging.INFO)
 
 # --- FILE LOADER WITH LOCAL FALLBACK ---
 def load_or_download_file(file_path: Path, file_id: str, description: str = "", validate_json=False):
+    """Load a file locally or download it from DNAnexus.
+
+    Args:
+        file_path: Expected local path.
+        file_id: DNAnexus file id to download if missing.
+        description: Human-readable description for logging.
+        validate_json: If True, require file to be valid JSON.
+
+    Returns:
+        Path to the resolved local file.
+
+    Raises:
+        FileNotFoundError: If download fails.
+    """
     def is_valid_json(path: Path):
         try:
             with open(path, "r") as f:
@@ -61,6 +75,15 @@ def load_or_download_file(file_path: Path, file_id: str, description: str = "", 
 
 # --- HELPER TO RESOLVE FILE PATHS FROM CONFIG ---
 def resolve_path(config, file_info):
+    """Resolve a file path from config metadata.
+
+    Args:
+        config: Parsed config dictionary.
+        file_info: File info dict with BASE and FILENAME keys.
+
+    Returns:
+        Resolved Path for the file.
+    """
     base_key = file_info["BASE"]
     parts = base_key.split(".")
     base_path = config["BASE_PATHS"]
@@ -69,14 +92,27 @@ def resolve_path(config, file_info):
     return Path(config["PROJECT_DIR_PATH"]) / base_path / file_info["FILENAME"]
 
 def get_file(file_info, config):
+    """Resolve and load a file described in config.
+
+    Args:
+        file_info: File metadata from config.
+        config: Parsed config dictionary.
+
+    Returns:
+        Path to the resolved local file.
+    """
     file_path = resolve_path(config, file_info)
     return load_or_download_file(file_path, file_info["ID"], file_info["FILENAME"])
 
 # --- EXTRACT FIELDS USING DX ---
 def _extract_fields(dataset_id, field_list_path: Path, output_file: str, sql_only: bool = False):
-    """
-    Read a CSV with columns ['entity','name'] (optionally 'coding_name'), build a DNAnexus extract command,
-    and either write SQL (--sql) or extract data to CSV.
+    """Extract fields from a DNAnexus dataset or write SQL.
+
+    Args:
+        dataset_id: DNAnexus dataset id.
+        field_list_path: CSV path with columns ['entity', 'name'].
+        output_file: Output file path for CSV or SQL.
+        sql_only: If True, output SQL instead of extracting data.
     """
     try:
         df = pd.read_csv(field_list_path)
@@ -136,6 +172,14 @@ def _extract_fields(dataset_id, field_list_path: Path, output_file: str, sql_onl
 # ---------- SQL → pandas / Spark ----------
 
 def _read_sql_string(sql_or_path: str | Path) -> str:
+    """Read SQL from a file or return the string as-is.
+
+    Args:
+        sql_or_path: SQL string or path to a .sql file.
+
+    Returns:
+        SQL string without trailing semicolon.
+    """
     sql = Path(sql_or_path).read_text(encoding="utf-8") if Path(str(sql_or_path)).exists() else str(sql_or_path)
     sql = sql.strip()
     if sql.endswith(";"):
@@ -143,6 +187,16 @@ def _read_sql_string(sql_or_path: str | Path) -> str:
     return sql
 
 def pandas_from_sql(sql_or_path, *, downcast_floats=True, downcast_ints=True):
+    """Execute SQL in Spark and collect in partitions to pandas.
+
+    Args:
+        sql_or_path: SQL string or .sql file path.
+        downcast_floats: If True, downcast float columns.
+        downcast_ints: If True, downcast integer columns.
+
+    Returns:
+        Pandas DataFrame containing the SQL results.
+    """
     from pyspark.sql import SparkSession, functions as F
 
     sql = _read_sql_string(sql_or_path)
@@ -175,6 +229,15 @@ def pandas_from_sql(sql_or_path, *, downcast_floats=True, downcast_ints=True):
     return pd.concat(chunks, ignore_index=True)
 
 def sql_to_pandas(sql_or_path, *, try_fast_first=True):
+    """Execute SQL via Spark and return a pandas DataFrame.
+
+    Args:
+        sql_or_path: SQL string or .sql file path.
+        try_fast_first: If True, try direct toPandas() first.
+
+    Returns:
+        Pandas DataFrame with SQL results.
+    """
     from pyspark.sql import SparkSession
     sql = _read_sql_string(sql_or_path)
 
@@ -192,9 +255,13 @@ def sql_to_pandas(sql_or_path, *, try_fast_first=True):
     return pandas_from_sql(sql_or_path)
 
 def sql_to_spark(sql_or_path: str | Path):
-    """
-    Return a Spark DataFrame for the given SQL (string or .sql file),
-    avoiding any collection to the driver.
+    """Return a Spark DataFrame for the given SQL.
+
+    Args:
+        sql_or_path: SQL string or .sql file path.
+
+    Returns:
+        Spark DataFrame for the SQL query.
     """
     from pyspark.sql import SparkSession
     sql = _read_sql_string(sql_or_path)
@@ -212,13 +279,20 @@ def run_extraction(
     sql_only: bool = False,
     cohort_key: str = "TEST_COHORT_ID",
 ):
-    """
-    Run the extraction using either:
-      - input_file: path to list file (.csv/.tsv/.xlsx) or a config key under FILES.PHENOTYPE_FILES
-      - fields: list of "entity.field" strings
-      - fields_dict: dict of entity -> field
+    """Run extraction using a file list or inline field definitions.
 
-    Exactly one of (input_file) or (fields/fields_dict) should be provided.
+    Args:
+        output_path: Output path for CSV or SQL.
+        input_file: Path to list file or config key.
+        fields: List of "entity.field" strings.
+        fields_dict: Dict of entity -> field.
+        dataset_id_override: Optional dataset id override.
+        sql_only: If True, output SQL instead of extracting data.
+        cohort_key: Config cohort key to resolve dataset id.
+
+    Raises:
+        ValueError: If input_file and fields/fields_dict are both provided.
+        KeyError: If required config keys are missing.
     """
     # prevent ambiguous inputs
     if (fields or fields_dict) and input_file is not None:
@@ -320,13 +394,16 @@ def fields(
     fields: list[str] | None = None,
     fields_dict: dict[str, str] | None = None,
 ):
-    """
-    Main entry point for extracting raw phenotype values or generating SQL queries for DNAnexus datasets.
+    """Extract phenotype values or generate SQL queries.
 
-    Call styles:
-      1) input_file = path (.csv/.tsv/.xlsx) or config key (legacy)
-      2) fields = ["entity.field", ...]
-      3) fields_dict = {"entity": "field", ...}
+    Args:
+        output_file: Output file path for CSV or SQL.
+        input_file: Path to list file or config key.
+        cohort_key: Config cohort key to resolve dataset id.
+        dataset_id: Optional dataset id override.
+        sql_only: If True, output SQL instead of extracting data.
+        fields: List of "entity.field" strings.
+        fields_dict: Dict of entity -> field.
     """
     run_extraction(
         Path(output_file),

@@ -23,16 +23,14 @@ logger = logging.getLogger(__name__)
 # Public API
 # ----------------------------
 def metadata() -> Dict[str, pd.DataFrame]:
-    """
-    Ensure metadata dictionary files are downloaded, then load them into DataFrames.
+    """Load metadata dictionary files into DataFrames.
 
-    Returns
-    -------
-    dict[str, pd.DataFrame]
-        Keys:
-          - 'codings'
-          - 'data_dictionary'
-          - 'entity_dictionary'
+    Returns:
+        Mapping with keys 'codings', 'data_dictionary', and 'entity_dictionary'.
+
+    Raises:
+        RuntimeError: If a required file is missing or fails to load.
+        FileNotFoundError: If an expected file path does not exist.
     """
     files = _download_metadata_files()  # {'codings': Path, 'data_dictionary': Path, 'entity_dictionary': Path}
     dfs: Dict[str, pd.DataFrame] = {}
@@ -51,17 +49,13 @@ def metadata() -> Dict[str, pd.DataFrame]:
 
 
 def _download_metadata_files() -> Dict[str, Path]:
-    """
-    Download the codings, data and entity dictionary assets into ./metadata/.
+    """Download metadata files into ./metadata.
 
-    Returns
-    -------
-    dict[str, Path]
-        {
-            "codings": Path,
-            "data_dictionary": Path,
-            "entity_dictionary": Path,
-        }
+    Returns:
+        Mapping of file keys to local Paths.
+
+    Raises:
+        RuntimeError: If config loading or downloads fail.
     """
     # 1) Load project config
     try:
@@ -177,29 +171,21 @@ def field_list(
     input_file=None,                    # backward-compat alias
     input_file_name: str | None = None  # backward-compat alias
 ) -> pd.DataFrame | None:
-    """
-    Process a phenotype list (file path, file ID, list of fields, or dict of entity→field)
-    into a merged metadata table.
+    """Build a merged metadata table from a phenotype list.
 
-    Parameters
-    ----------
-    fields : list[str] | dict[str, str] | str | None
-        - list form: ["entity.field", ...]
-        - dict form: {"entity": "field", ...}
-        - str: path/ID/config key (legacy file behavior)
-    output_file : str | None
-        If provided, write CSV to this path and return None; otherwise return the DataFrame.
-    fields_list_name : str | None
-        Optional filename to use when downloading a direct file ID (new-style alias).
-    input_file : any
-        Backwards-compatible alias for `fields`. If `fields` is None, this is used.
-    input_file_name : str | None
-        Backwards-compatible alias for `fields_list_name`.
+    Args:
+        fields: List of "entity.field", dict of entity->field, or path/ID.
+        output_file: If provided, write CSV to this path and return None.
+        fields_list_name: Optional filename when downloading a direct file ID.
+        input_file: Backward-compatible alias for fields.
+        input_file_name: Backward-compatible alias for fields_list_name.
 
-    Returns
-    -------
-    pd.DataFrame | None
-        The processed/merged metadata table, or None if `output_file` is provided.
+    Returns:
+        The processed metadata table, or None if output_file is provided.
+
+    Raises:
+        RuntimeError: If config or input loading fails.
+        ValueError: If fields input format is unsupported.
     """
     # --- Backward-compatibility shims
     if fields is None and input_file is not None:
@@ -349,11 +335,21 @@ def field_list(
 # Internal utilities
 # ----------------------------
 def _clean_path_str(s: str) -> str:
+    """Normalize path strings by trimming whitespace and non-breaking spaces."""
     return str(s).strip().replace("\u00a0", " ")
 
 
 # replace resolve_path with a sanitized version
 def resolve_path(config: dict, file_info: dict) -> Path:
+    """Resolve a config file entry into a concrete path.
+
+    Args:
+        config: Parsed config dictionary.
+        file_info: File info from config (must include BASE and FILENAME).
+
+    Returns:
+        Resolved Path to the file.
+    """
     base_key = _clean_path_str(file_info["BASE"])
     parts = [p.strip() for p in base_key.split(".")]
 
@@ -367,12 +363,28 @@ def resolve_path(config: dict, file_info: dict) -> Path:
 
 
 def get_file(file_info: dict, config: dict) -> Path:
-    """Fetch a file defined in config FILES section and return the local Path."""
+    """Fetch a configured file and return its local path.
+
+    Args:
+        file_info: FILES entry from config.
+        config: Parsed config dictionary.
+
+    Returns:
+        Local path to the file (downloaded if needed).
+    """
     file_path = resolve_path(config, file_info)
     return _load_or_download_file(file_path, file_info["ID"], file_info.get("FILENAME", file_path.name))
 
 
 def float_to_int_if_possible(val):
+    """Convert float-like values to int when they represent whole numbers.
+
+    Args:
+        val: Value to coerce.
+
+    Returns:
+        int when a whole number, otherwise original numeric or value.
+    """
     try:
         float_val = float(val)
         int_val = int(float_val)
@@ -382,6 +394,14 @@ def float_to_int_if_possible(val):
 
 
 def strip_strings(df: pd.DataFrame) -> pd.DataFrame:
+    """Strip surrounding whitespace from object-typed columns.
+
+    Args:
+        df: Input DataFrame.
+
+    Returns:
+        DataFrame with stripped object columns.
+    """
     out = df.copy()
     for col in out.columns:
         if out[col].dtype == "object":
@@ -390,7 +410,14 @@ def strip_strings(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _run_dx_dump_dictionary(outdir: Path) -> None:
-    """Run `dx extract_dataset -ddd` into outdir using utils.get_dataset_id()."""
+    """Run `dx extract_dataset -ddd` into outdir.
+
+    Args:
+        outdir: Output directory for dictionary files.
+
+    Raises:
+        RuntimeError: If dx is missing or the command fails.
+    """
     outdir.mkdir(parents=True, exist_ok=True)
     dataset_id = get_dataset_id()  # e.g. "project-xxxx:record-xxxx"
     try:
@@ -409,7 +436,14 @@ def _run_dx_dump_dictionary(outdir: Path) -> None:
 
 
 def _find_dumped_dictionary_files(outdir: Path) -> Dict[str, Path | None]:
-    """Find the three dictionary files produced by -ddd. Returns a dict of Paths (or None if missing)."""
+    """Find dictionary files produced by dx -ddd.
+
+    Args:
+        outdir: Directory where dumped files are stored.
+
+    Returns:
+        Mapping of keys to Paths (or None if missing).
+    """
     codings = next(outdir.glob("*.codings.csv"), None)
     data_dictionary = next(outdir.glob("*.data_dictionary.csv"), None)
     entity_dictionary = next(outdir.glob("*.entity_dictionary.csv"), None)
@@ -428,9 +462,21 @@ def _load_or_download_file(
     config_mode: bool = False,
     dest_dir: Path | None = None,
 ) -> Path:
-    """
-    Load or download a file. If dest_dir is provided, the downloaded file
-    will be placed in that directory with its original filename.
+    """Load a file from disk or download via dx.
+
+    Args:
+        file_path: Desired file path.
+        file_id: DNAnexus file ID.
+        description: Human-readable file description.
+        validate_json: Whether to validate JSON content when present.
+        config_mode: If True, enforces JSON validation.
+        dest_dir: Optional destination directory for downloads.
+
+    Returns:
+        Path to the local file.
+
+    Raises:
+        FileNotFoundError: If download fails.
     """
     file_path = Path(file_path)
     validate_json = bool(validate_json or config_mode)

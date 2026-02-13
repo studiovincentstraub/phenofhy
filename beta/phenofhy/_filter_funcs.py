@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 def implausible_age_year_combinations(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Remove rows that contain known implausible sentinel values for birth
-    year or birth month.
-    - Keeps behavior identical to the original: removes sentinel -999 for
-      'participant.birth_year' and 'participant.birth_month'.
-    - Skips checks if columns are missing.
-    - Returns a filtered DataFrame (does not modify in-place).
+    """Remove rows with implausible birth year/month sentinel values.
+
+    Args:
+        df: Input dataframe.
+
+    Returns:
+        Filtered dataframe with sentinel -999 values removed when columns exist.
     """
     out = df
     if 'participant.birth_year' in out.columns:
@@ -30,17 +30,14 @@ def _filter_clinic_measurements_plausibility(
     df: pd.DataFrame,
     ranges: Optional[Dict[str, Tuple[float, float]]] = None,
 ) -> pd.DataFrame:
-    """
-    Internal helper: drop rows where clinic measurement values are outside
-    plausible bounds as defined by the Biometrics Ranges and Proforma 
-    defined by Our Future Health. NA values are preserved (not dropped).
+    """Filter out-of-range clinic measurements while preserving NAs.
 
-    Default plausible ranges (can be overridden by passing `ranges`):
-      - clinic_measurements.height   : (90, 299)  # cm
-      - clinic_measurements.weight   : (20, 400)   # kg
-      - clinic_measurements.waist    : (30, 200)   # cm
+    Args:
+        df: Input dataframe.
+        ranges: Optional mapping of column name to (low, high) bounds.
 
-    The function will only check columns that exist in `df`.
+    Returns:
+        Filtered dataframe with rows outside bounds removed.
     """
     default_ranges = {
         "clinic_measurements.height": (90, 299),
@@ -65,13 +62,14 @@ def remove_known_errors(
     *,
     clinic_ranges: Optional[Dict[str, Tuple[float, float]]] = None,
 ) -> pd.DataFrame:
-    """
-    Top-level cleaning wrapper that applies known error-removal helpers,
-    but only when the required columns are present.
+    """Apply known error-removal helpers when required columns exist.
 
-    - Age/year filtering runs only if birth year or birth month exists.
-    - Clinic plausibility filtering runs only if at least one clinic
-      measurement column exists (height, weight, waist).
+    Args:
+        df: Input dataframe.
+        clinic_ranges: Optional mapping of clinic column ranges.
+
+    Returns:
+        Filtered dataframe with known error rows removed.
     """
     out = df
 
@@ -107,13 +105,18 @@ def apply_row_filters(
     keep_na: bool = False,
     ignore_missing_range_cols: bool = False,
 ) -> pd.DataFrame:
-    """
-    Generic, reusable row-level filtering helper.
+    """Apply range- and expression-based row filters.
 
-    - ranges: mapping col -> (lo, hi) to keep rows where col between(lo, hi).
-    - exprs: list of pandas eval() expressions to be ANDed into the mask.
-    - keep_na: if True, rows with NA in a range column are retained.
-    - ignore_missing_range_cols: if True, absent range columns are skipped.
+    Args:
+        df: Input dataframe.
+        ranges: Mapping of column -> (low, high) bounds.
+        exprs: Optional list of pandas eval() expressions to AND into the mask.
+        inclusive: Bound inclusion for between().
+        keep_na: If True, retain rows with NA in range columns.
+        ignore_missing_range_cols: If True, skip missing range columns.
+
+    Returns:
+        Filtered dataframe.
     """
     mask = pd.Series(True, index=df.index)
 
@@ -136,9 +139,13 @@ def apply_row_filters(
 
 
 def floor_age_series(s: pd.Series) -> pd.Series:
-    """
-    Convert a series to floored integer ages, treating negative ages as missing.
-    Returns a pandas nullable Int64 series.
+    """Floor ages to integer years, treating negatives as missing.
+
+    Args:
+        s: Input series of ages.
+
+    Returns:
+        Nullable Int64 series of floored ages.
     """
     s_num = pd.to_numeric(s, errors="coerce")
     s_num = s_num.where(s_num >= 0)                # negative -> NaN
@@ -147,11 +154,13 @@ def floor_age_series(s: pd.Series) -> pd.Series:
 
 
 def filter_preferred_nonresponse(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Remove rows with non-substantive ("prefer not to say", "don't know", or missing)
-    responses in key demographic variables.
+    """Remove rows with preferred non-response values in key demographics.
 
-    Columns are only checked if present.
+    Args:
+        df: Input dataframe.
+
+    Returns:
+        Filtered dataframe with non-substantive responses removed.
     """
     logger.info("Applying preferred non-response exclusion filters")
 

@@ -30,12 +30,20 @@ def _get_diag_cols(
     extra: Optional[List[str]] = None,
     all_if_none: bool = False                          # <-- new flag
 ) -> List[str]:
-    """
-    Return diagnosis columns:
-      • if `explicit` passed, use those
-      • else try to match `prefix`
-      • else add `extra`
-      • if still none found and `all_if_none=True`, return all columns except pid
+    """Resolve diagnosis columns from explicit names, prefixes, and extras.
+
+    Args:
+        df: Input pandas DataFrame.
+        explicit: Explicit column names to use.
+        prefix: Column prefix to match when explicit is None.
+        extra: Additional column names to include when present in df.
+        all_if_none: When True, return all columns except pid if none found.
+
+    Returns:
+        List of diagnosis column names.
+
+    Raises:
+        ValueError: If no diagnosis columns are found and all_if_none is False.
     """
     if explicit is not None:
         return list(explicit)
@@ -57,7 +65,14 @@ def _get_diag_cols(
 
 
 def _normalize_codes(x: Any) -> List[str]:
-    """Accept a single code, a list of codes, or a stringified list; return a clean list of strings."""
+    """Normalize codes to a clean list of strings.
+
+    Args:
+        x: Single code, list of codes, or stringified list.
+
+    Returns:
+        List of cleaned string codes.
+    """
     if x is None or (isinstance(x, float) and pd.isna(x)):
         return []
     if isinstance(x, list):
@@ -69,12 +84,17 @@ def _normalize_codes(x: Any) -> List[str]:
 
 
 def _traits_to_codes(traits_and_codes: Any) -> Dict[str, List[str]]:
-    """
-    Accepts:
-      • dict {trait: codes}
-      • DataFrame with columns ['trait','ICD_code']
-      • tuple/list (traits, codes) of aligned sequences
-    Returns {trait: [codes...]} (deduped, order-preserving).
+    """Convert trait/code inputs into a normalized mapping.
+
+    Args:
+        traits_and_codes: Dict of trait->codes, DataFrame with columns
+            ['trait','ICD_code'], or (traits, codes) aligned sequences.
+
+    Returns:
+        Mapping of trait to a deduped list of codes (order-preserving).
+
+    Raises:
+        ValueError: If the input format is unsupported or missing columns.
     """
     if isinstance(traits_and_codes, Mapping):
         items = traits_and_codes.items()
@@ -100,7 +120,15 @@ def _traits_to_codes(traits_and_codes: Any) -> Dict[str, List[str]]:
 
 
 def _to_str_series(s: pd.Series, *, use_pyarrow: bool = True) -> pd.Series:
-    """Ensure a lean string dtype for fast vectorized ops (pandas path)."""
+    """Ensure a lean string dtype for fast vectorized ops.
+
+    Args:
+        s: Input series.
+        use_pyarrow: Prefer pyarrow string dtype when available.
+
+    Returns:
+        Series converted to a string dtype.
+    """
     if use_pyarrow:
         try:
             return s.astype("string[pyarrow]")
@@ -110,7 +138,14 @@ def _to_str_series(s: pd.Series, *, use_pyarrow: bool = True) -> pd.Series:
 
 
 def _is_spark_df(obj: Any) -> bool:
-    """Lightweight check to avoid importing pyspark at module import time."""
+    """Return True if the object looks like a Spark DataFrame.
+
+    Args:
+        obj: Object to check.
+
+    Returns:
+        True when the object has Spark DataFrame attributes.
+    """
     return hasattr(obj, "sparkSession") and hasattr(obj, "schema")
 
 # -------------------- Pandas APIs --------------------
@@ -130,6 +165,25 @@ def match_icd_traits(
     extra_diag_cols: Optional[List[str]] = None,
     all_if_none: bool = False,
 ) -> Tuple[Dict[str, set], pd.DataFrame]:
+    """Match ICD traits in a pandas DataFrame.
+
+    Args:
+        raw_df: Input DataFrame with diagnosis columns.
+        traits_and_codes: Dict, DataFrame, or (traits, codes) mapping.
+        diag_cols: Explicit diagnosis columns to scan.
+        pid_col: Participant ID column name.
+        prefix_if_len_at_most: Prefix length threshold for startswith matches.
+        primary_only: Use only the primary diagnosis column.
+        return_occurrence_counts: Include total occurrence counts per trait.
+        use_pyarrow_strings: Prefer pyarrow string dtype for faster ops.
+        chunksize: Optional chunk size for scanning large frames.
+        diag_prefix: Prefix to select diagnosis columns when diag_cols is None.
+        extra_diag_cols: Additional diagnosis columns to include when present.
+        all_if_none: If no diagnosis columns found, use all non-pid columns.
+
+    Returns:
+        A tuple of (trait_to_pids, summary_df).
+    """
 
     all_diag_cols = _get_diag_cols(
         raw_df,
@@ -209,9 +263,18 @@ def get_matched_icd_traits(
     uppercase: bool = True,
     remove_chars: Tuple[str, ...] = (),
 ) -> pd.DataFrame:
-    """
-    FAST (pandas): For each trait, return the number of distinct ICD codes present in the data
-    that match its rules, plus the list of those codes. Scans the unique code universe once.
+    """Summarize ICD code matches per trait (pandas path).
+
+    Args:
+        raw_df: Input DataFrame with diagnosis columns.
+        traits_and_codes: Dict, DataFrame, or (traits, codes) mapping.
+        diag_cols: Explicit diagnosis columns to scan.
+        prefix_if_len_at_most: Prefix length threshold for startswith matches.
+        uppercase: Whether to uppercase observed codes before matching.
+        remove_chars: Characters to remove from codes before matching.
+
+    Returns:
+        DataFrame with columns [trait, n_unique_codes, unique_codes].
     """
     diag_cols = _get_diag_cols(raw_df, diag_cols)
 
@@ -277,6 +340,20 @@ def _spark_diag_long(
     uppercase: bool = True,
     remove_chars: tuple = ()
 ):
+    """Explode diagnosis columns into a long Spark DataFrame.
+
+    Args:
+        sdf: Spark DataFrame with diagnosis columns.
+        pid_col: Participant ID column name.
+        diag_prefix: Prefix to select diagnosis columns.
+        extra_diag_cols: Optional extra diagnosis columns.
+        primary_only: If True, keep only the primary diagnosis column.
+        uppercase: Whether to uppercase codes.
+        remove_chars: Characters to remove from codes.
+
+    Returns:
+        Spark DataFrame with columns [pid, code].
+    """
     from pyspark.sql import functions as F
     import re
 
@@ -329,6 +406,22 @@ def get_matched_icd_traits_spark(
     uppercase: bool = True,
     remove_chars: tuple = (),
 ) -> pd.DataFrame:
+    """Summarize ICD code matches per trait using Spark.
+
+    Args:
+        sdf: Spark DataFrame with diagnosis columns.
+        traits_and_codes: Dict, DataFrame, or (traits, codes) mapping.
+        pid_col: Participant ID column name.
+        diag_prefix: Prefix to select diagnosis columns.
+        extra_diag_cols: Optional extra diagnosis columns.
+        primary_only: If True, keep only the primary diagnosis column.
+        prefix_if_len_at_most: Prefix length threshold for startswith matches.
+        uppercase: Whether to uppercase observed codes before matching.
+        remove_chars: Characters to remove from codes before matching.
+
+    Returns:
+        DataFrame with columns [trait, n_unique_codes, unique_codes].
+    """
     long_df = _spark_diag_long(
         sdf,
         pid_col=pid_col,
@@ -372,13 +465,24 @@ def match_icd_traits_spark(
     return_pids: bool = False,
     max_pids_collect: int = 200_000,
 ):
-    """
-    Vectorized version: unpivots once, broadcasts the (small) trait codes, applies
-    prefix/equals matching row-wise, and aggregates in Spark.
+    """Match ICD traits in Spark with broadcasted trait codes.
+
+    Args:
+        sdf: Spark DataFrame with diagnosis columns.
+        traits_and_codes: Dict, DataFrame, or (traits, codes) mapping.
+        pid_col: Participant ID column name.
+        diag_prefix: Prefix to select diagnosis columns.
+        extra_diag_cols: Optional extra diagnosis columns.
+        primary_only: If True, keep only the primary diagnosis column.
+        prefix_if_len_at_most: Prefix length threshold for startswith matches.
+        uppercase: Whether to uppercase observed codes before matching.
+        remove_chars: Characters to remove from codes before matching.
+        return_occurrence_counts: Include total occurrence counts per trait.
+        return_pids: Whether to collect pid sets for small traits.
+        max_pids_collect: Maximum pid set size to collect per trait.
 
     Returns:
-      trait_to_pids: Dict[str, set]   (empty sets when too large or return_pids=False)
-      summary_df: pandas.DataFrame with columns ["trait","participant_count",("occurrence_count"?)]
+        A tuple of (trait_to_pids, summary_df).
     """
     import pandas as pd
     from pyspark.sql import functions as F
@@ -504,7 +608,16 @@ def match_icd_traits_spark(
 # --- Dispatcher (keep stripping pandas-only kwargs, do NOT strip extra_diag_cols) ---
 
 def match_icd_traits_any(df_or_sdf, *args, **kwargs):
-    """Route to pandas or Spark implementation depending on object type."""
+    """Dispatch to pandas or Spark matcher based on input type.
+
+    Args:
+        df_or_sdf: pandas DataFrame or Spark DataFrame.
+        *args: Positional arguments forwarded to the implementation.
+        **kwargs: Keyword arguments forwarded to the implementation.
+
+    Returns:
+        The result of match_icd_traits or match_icd_traits_spark.
+    """
     if _is_spark_df(df_or_sdf):
         # remove pandas-only args
         kwargs.pop("use_pyarrow_strings", None)
@@ -515,7 +628,16 @@ def match_icd_traits_any(df_or_sdf, *args, **kwargs):
 
 
 def get_matched_icd_traits_any(df_or_sdf, *args, **kwargs):
-    """Route to pandas or Spark implementation depending on object type."""
+    """Dispatch to pandas or Spark code-summary based on input type.
+
+    Args:
+        df_or_sdf: pandas DataFrame or Spark DataFrame.
+        *args: Positional arguments forwarded to the implementation.
+        **kwargs: Keyword arguments forwarded to the implementation.
+
+    Returns:
+        The result of get_matched_icd_traits or get_matched_icd_traits_spark.
+    """
     if _is_spark_df(df_or_sdf):
         return get_matched_icd_traits_spark(df_or_sdf, *args, **kwargs)
     return get_matched_icd_traits(df_or_sdf, *args, **kwargs)
