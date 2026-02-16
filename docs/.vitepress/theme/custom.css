@@ -47,7 +47,7 @@
   --vp-c-bg-alt: #0b2b66;   /* subtle elevation only */
 
   /* Text (NO blue-on-blue) */
-  --vp-c-text-1: #ffffff;  /* primary text */
+  --vp-c-text-1: #fbfbfd;  /* primary text */
   --vp-c-text-2: #cbd5e1;  /* secondary text (neutral) */
 
   /* Links (brand-aligned, readable) */
@@ -78,4 +78,15 @@
 .VPHomeHero {
    --vp-home-hero-image-width: clamp(2580px, 180vw, 5700px);
    --vp-home-hero-image-height: clamp(2520px, 150vw, 3600px);
+}
+
+.VPHero .image,
+.VPHomeHero .image {
+   overflow: visible;
+}
+
+.VPHero .image img,
+.VPHomeHero .image img {
+  transform: scale(1.6) translateY(-80px);
+  transform-origin: right;
 }
