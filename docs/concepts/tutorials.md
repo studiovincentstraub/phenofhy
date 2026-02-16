@@ -1,6 +1,6 @@
 # Running a Pipeline
 
-This **Tutorials** section provides guidance for using phenofhy. For full documentation of each module and function, see the [API reference](/api).
+This **Tutorials** section provides guidance for using phenofhy. For full documentation of each module and function, see the [API reference](/api/).
 
 
 ## Running a Pipeline
