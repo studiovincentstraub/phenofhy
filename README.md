@@ -41,6 +41,19 @@ Tip: when you upload the package, avoid nesting `Phenofhy` inside another
 `Phenofhy` folder. The TRE should contain a single `Phenofhy/` directory that
 includes the beta modules, which can be optionally nested inside a `applets/` folder.
 
+## Documentation
+
+Explore the full Phenofhy documentation here: https://studiovincentstraub.github.io/Phenofhy/
+
+Where to start on the documentation website?
+
+- New to Phenofhy or OFH phenotype analysis? Begin with "About" and then the
+	"Quickstart" for a smooth introduction.
+- Got your own data? After "About" and "Quickstart", you are ready to dive in
+	and start analyzing.
+- Looking for more? Check out the example workflows and API reference to deepen
+	your understanding.
+
 ## Example workflow
 
 ```python
@@ -82,21 +95,6 @@ report = utils.upload_files(
    dx_target="results"
 )
 ```
-
-## Documentation
-
-Explore the full Phenofhy documentation here: https://studiovincentstraub.github.io/Phenofhy/
-Even though the documentation website is still under construction, you can
-already find useful information there.
-
-Where to start on the documentation website?
-
-- New to Phenofhy or OFH phenotype analysis? Begin with "About" and then the
-	"Quickstart" for a smooth introduction.
-- Got your own data? After "About" and "Quickstart", you are ready to dive in
-	and start analyzing.
-- Looking for more? Check out the example workflows and API reference to deepen
-	your understanding.
 
 ## Contributing
 
