@@ -4,6 +4,7 @@ export default defineConfig({
   title: "Phenofhy",
   description: "Python package for phenotype data processing and analysis within the Our Future Health TRE",
   base: '/phenofhy/',
+  head: [['link', { rel: 'icon', href: '/logo/phenofhy-icon.ico' }]],
 
   // disable dark mode
   appearance: false,

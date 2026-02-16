@@ -2,7 +2,7 @@
 
 Phenofhy is designed to run in the Our Future Health (OFH) trusted research environment (TRE) with DNAnexus tooling inside a `JupyterLab` notebook.
 
-## Requirements
+## Prerequisites
 
 - Working knowledge of `Python` is requried and an understanding of how to launch and run analyses in the Our Future Health DNAnexus TRE using `JupyterLab`.
 - For reference, an overview of resources for getting up to speed with DNAnexus TRE, the `dx toolkit`, and working on phenotypic data with `JupyterLab` is provided [here](https://github.com/studiovincentstraub/phenofhy/blob/main/resources/DNAnexus-links.md).
