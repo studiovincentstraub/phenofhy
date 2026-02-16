@@ -42,6 +42,7 @@ def phenotype_profile(
     age_bin_width: int = 2,
     body_bin_width: int = 1,
     min_n_per_bin: int = 30,
+    error_mode: str = "se",
     output: Optional[str] = None,
 ) -> Tuple[plt.Figure, Dict[str, Any]]:
     """Generate a phenotype profile figure and summary metadata.
@@ -57,6 +58,7 @@ def phenotype_profile(
         age_bin_width: Age bin width in years.
         body_bin_width: Bin width for BMI/height trends.
         min_n_per_bin: Minimum count required per bin to plot.
+        error_mode: "se" for standard error or "sd" for standard deviation.
         output: Optional output PDF path.
 
     Returns:
@@ -112,9 +114,9 @@ def phenotype_profile(
     _plot_demographics(ax_demo, demographics)
     _plot_completeness(ax_complete, sample_flow)
     _plot_distribution(ax_dist, working, phenotype, field_label, ptype, sex_label_col="__sex_label")
-    _plot_age_trend(ax_age, working, phenotype, field_label, age_col, min_n_per_bin, age_bin_width)
-    _plot_body_trend(ax_bmi, working, phenotype, field_label, bmi_col, min_n_per_bin, body_bin_width)
-    _plot_body_trend(ax_height, working, phenotype, field_label, height_col, min_n_per_bin, body_bin_width)
+    _plot_age_trend(ax_age, working, phenotype, field_label, ptype, age_col, min_n_per_bin, age_bin_width, error_mode)
+    _plot_body_trend(ax_bmi, working, phenotype, field_label, ptype, bmi_col, min_n_per_bin, body_bin_width, error_mode)
+    _plot_body_trend(ax_height, working, phenotype, field_label, ptype, height_col, min_n_per_bin, body_bin_width, error_mode)
 
     if ax_bmi.lines and ax_height.lines:
         y_max = max(ax_bmi.get_ylim()[1], ax_height.get_ylim()[1])
@@ -169,6 +171,8 @@ def _standardize_sex(series: Optional[pd.Series]) -> pd.Series | None:
                 return "Male"
             if iv == 2:
                 return "Female"
+            if iv in {3, 4}:
+                return "Other"
         except Exception:
             pass
         s = str(v).strip().lower()
@@ -201,6 +205,25 @@ def _infer_phenotype_type(series: pd.Series) -> str:
     return "categorical"
 
 
+def _infer_positive_value(series: pd.Series) -> Any:
+    """Heuristically choose a positive class value for binary phenotypes."""
+    s = series.dropna()
+    if s.empty:
+        return 1
+    uniq = list(pd.unique(s))
+    for candidate in [1, 1.0, True, "1", "yes", "y", "true", "case", "positive"]:
+        for value in uniq:
+            if isinstance(value, str):
+                if value.strip().lower() == str(candidate).strip().lower():
+                    return value
+            elif value == candidate:
+                return value
+    numeric = [v for v in uniq if isinstance(v, (int, float, np.integer, np.floating))]
+    if numeric:
+        return max(numeric)
+    return sorted([str(v) for v in uniq])[-1]
+
+
 def _compute_sample_flow(original: pd.DataFrame, working: pd.DataFrame, phenotype: str) -> pd.DataFrame:
     """Build a simple sample flow table.
 
@@ -212,10 +235,12 @@ def _compute_sample_flow(original: pd.DataFrame, working: pd.DataFrame, phenotyp
     Returns:
         DataFrame describing initial, non-missing, and missing counts.
     """
+    non_missing = int(original[phenotype].notna().sum()) if phenotype in original.columns else 0
+    total = len(original)
     return pd.DataFrame([
-        {"step": "initial", "n": len(original)},
-        {"step": f"non-missing {phenotype}", "n": len(working)},
-        {"step": f"missing {phenotype}", "n": len(original) - len(working)},
+        {"step": "initial", "n": total},
+        {"step": f"non-missing {phenotype}", "n": non_missing},
+        {"step": f"missing {phenotype}", "n": total - non_missing},
     ])
 
 
@@ -246,7 +271,7 @@ def _summarize_demographics(
         "Var": "Total",
         "Level/Stat": "",
         "N": int(N),
-        "%": round(100.0, 1) if N > 0 else 0.0,
+        "%": round(100.0, 2) if N > 0 else 0.0,
         "Value": "",
     })
 
@@ -258,8 +283,14 @@ def _summarize_demographics(
             ser = df[sex_col].copy()
         ser = ser.fillna("Missing")
         counts = ser.value_counts(dropna=False)
-        for level, count in counts.items():
-            pct = round(100.0 * int(count) / N, 1) if N > 0 else 0.0
+        levels = list(counts.index)
+        if "Missing" in levels and "Other" in levels:
+            miss_idx = levels.index("Missing")
+            other_idx = levels.index("Other")
+            levels[miss_idx], levels[other_idx] = levels[other_idx], levels[miss_idx]
+        for level in levels:
+            count = counts[level]
+            pct = round(100.0 * int(count) / N, 2) if N > 0 else 0.0
             rows.append({
                 "Var": "Sex",
                 "Level/Stat": str(level),
@@ -285,7 +316,7 @@ def _summarize_demographics(
         ec = df[ethnicity_col].fillna("Missing")
         counts = ec.value_counts(dropna=False)
         for level, count in counts.items():
-            pct = round(100.0 * int(count) / N, 1) if N > 0 else 0.0
+            pct = round(100.0 * int(count) / N, 2) if N > 0 else 0.0
             rows.append({
                 "Var": "Ethnicity",
                 "Level/Stat": str(level),
@@ -581,7 +612,7 @@ def _plot_distribution(ax, df, phenotype, field_label, ptype, *, sex_label_col: 
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
-def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_width):
+def _plot_age_trend(ax, df, phenotype, field_label, ptype, age_col, min_n, age_bin_width, error_mode):
     """Plot mean phenotype by age bins.
 
     Args:
@@ -594,10 +625,16 @@ def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_widt
         age_bin_width: Age bin width in years.
     """
     ax.clear()
-    ax.set_title("Mean by age (binned)", fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
+    title = "Mean by age (binned)" if ptype == "continuous" else "Proportion by age (binned)"
+    ax.set_title(title, fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
 
     if age_col not in df.columns:
         ax.text(0.5, 0.5, "Age column not available", ha="center")
+        ax.set_axis_off()
+        return
+
+    if ptype == "categorical":
+        ax.text(0.5, 0.5, "Categorical phenotype: trend not supported", ha="center")
         ax.set_axis_off()
         return
 
@@ -614,11 +651,20 @@ def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_widt
     bins = np.arange(amin, amax + age_bin_width + 1, age_bin_width) if (amax - amin) >= age_bin_width else np.arange(amin, amax + 1, 1)
     tmp["_bin"] = pd.cut(tmp[age_col], bins=bins, right=False, include_lowest=True)
 
-    grouped = (
-        tmp.groupby(["_bin", "__sex_label"], observed=False)
-        .agg(mean=(phenotype, "mean"), sd=(phenotype, "std"), n=(phenotype, "count"))
-        .reset_index()
-    )
+    if ptype == "continuous":
+        grouped = (
+            tmp.groupby(["_bin", "__sex_label"], observed=False)
+            .agg(mean=(phenotype, "mean"), sd=(phenotype, "std"), n=(phenotype, "count"))
+            .reset_index()
+        )
+    else:
+        pos_val = _infer_positive_value(tmp[phenotype])
+        tmp["__pos"] = tmp[phenotype] == pos_val
+        grouped = (
+            tmp.groupby(["_bin", "__sex_label"], observed=False)
+            .agg(p=("__pos", "mean"), sd=("__pos", "std"), n=("__pos", "count"))
+            .reset_index()
+        )
 
     # plot Male and Female only and in that order
     for label, color in [("Male", COLOR_MALE), ("Female", COLOR_FEMALE)]:
@@ -627,16 +673,24 @@ def _plot_age_trend(ax, df, phenotype, field_label, age_col, min_n, age_bin_widt
         if g.empty:
             continue
         mids = g["_bin"].apply(lambda x: (x.left + x.right) / 2)
-        # yerr is 1 SD
-        ax.errorbar(mids, g["mean"], yerr=g["sd"], fmt="o", label=label, color=color)
+        if ptype == "continuous":
+            y = g["mean"].astype(float)
+        else:
+            y = g["p"].astype(float)
+        if error_mode == "sd":
+            yerr = g["sd"].fillna(0)
+        else:
+            yerr = g["sd"].fillna(0) / np.sqrt(g["n"].clip(lower=1))
+        ax.errorbar(mids, y, yerr=yerr, fmt="o", label=label, color=color)
     ax.set_xlabel("Age (years)", fontsize=TEXT_FONTSIZE)
-    ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
+    ylab = f"Mean {field_label}" if ptype == "continuous" else f"Proportion {field_label}"
+    ax.set_ylabel(ylab, fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)
 
 
-def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width):
+def _plot_body_trend(ax, df, phenotype, field_label, ptype, body_col, min_n, bin_width, error_mode):
     """Plot mean phenotype by BMI/height bins.
 
     Args:
@@ -650,11 +704,17 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width)
     """
     # body_col might be None or missing
     ax.clear()
-    title = f"Mean by {body_col.split('.')[-1] if body_col else ''} (binned)"
+    label = body_col.split(".")[-1] if body_col else ""
+    title = f"Mean by {label} (binned)" if ptype == "continuous" else f"Proportion by {label} (binned)"
     ax.set_title(title, fontsize=TITLE_FONTSIZE, fontweight="bold", loc="center")
 
     if body_col is None or body_col not in df.columns:
         ax.text(0.5, 0.5, f"{body_col or 'Body measure'} not available", ha="center")
+        ax.set_axis_off()
+        return
+
+    if ptype == "categorical":
+        ax.text(0.5, 0.5, "Categorical phenotype: trend not supported", ha="center")
         ax.set_axis_off()
         return
 
@@ -681,11 +741,20 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width)
         bins = np.array([bmin, bmax + 1.0])
     tmp["_bin"] = pd.cut(tmp[body_col], bins=bins, right=False, include_lowest=True)
 
-    grouped = (
-        tmp.groupby(["_bin", "__sex_label"], observed=False)
-        .agg(mean=(phenotype, "mean"), sd=(phenotype, "std"), n=(phenotype, "count"))
-        .reset_index()
-    )
+    if ptype == "continuous":
+        grouped = (
+            tmp.groupby(["_bin", "__sex_label"], observed=False)
+            .agg(mean=(phenotype, "mean"), sd=(phenotype, "std"), n=(phenotype, "count"))
+            .reset_index()
+        )
+    else:
+        pos_val = _infer_positive_value(tmp[phenotype])
+        tmp["__pos"] = tmp[phenotype] == pos_val
+        grouped = (
+            tmp.groupby(["_bin", "__sex_label"], observed=False)
+            .agg(p=("__pos", "mean"), sd=("__pos", "std"), n=("__pos", "count"))
+            .reset_index()
+        )
 
     for label, color in [("Male", COLOR_MALE), ("Female", COLOR_FEMALE)]:
         g = grouped[grouped["__sex_label"] == label]
@@ -693,9 +762,18 @@ def _plot_body_trend(ax, df, phenotype, field_label, body_col, min_n, bin_width)
         if g.empty:
             continue
         mids = g["_bin"].apply(lambda x: (x.left + x.right) / 2)
-        ax.errorbar(mids, g["mean"], yerr=g["sd"], fmt="o", label=label, color=color)
+        if ptype == "continuous":
+            y = g["mean"].astype(float)
+        else:
+            y = g["p"].astype(float)
+        if error_mode == "sd":
+            yerr = g["sd"].fillna(0)
+        else:
+            yerr = g["sd"].fillna(0) / np.sqrt(g["n"].clip(lower=1))
+        ax.errorbar(mids, y, yerr=yerr, fmt="o", label=label, color=color)
     ax.set_xlabel(body_col.split(".")[-1], fontsize=TEXT_FONTSIZE)
-    ax.set_ylabel(f"Mean {field_label}", fontsize=TEXT_FONTSIZE)
+    ylab = f"Mean {field_label}" if ptype == "continuous" else f"Proportion {field_label}"
+    ax.set_ylabel(ylab, fontsize=TEXT_FONTSIZE)
     ax.tick_params(axis="both", labelsize=TEXT_FONTSIZE)
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=TEXT_FONTSIZE, frameon=False)

@@ -75,3 +75,7 @@
    line-height: 1;
 }
 
+.VPHomeHero {
+   --vp-home-hero-image-width: clamp(2580px, 180vw, 5700px);
+   --vp-home-hero-image-height: clamp(2520px, 150vw, 3600px);
+}
