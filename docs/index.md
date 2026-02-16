@@ -7,7 +7,7 @@ hero:
   text: "The Python package to process pheno data in Our Future Health"
   tagline: User-friendly, efficient and easy to install. Built for the OFH DNAnexus trusted research environment.
   image:
-    src: /logo/dashboard.png
+    src: /logo/dashboard-view.png
     alt: Phenofhy dashboard preview
   actions:
     - theme: brand
