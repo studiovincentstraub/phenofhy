@@ -96,6 +96,12 @@ report = utils.upload_files(
 )
 ```
 
+## Example output
+
+Below is a phenotype profile report (using simulated data). 
+
+![cover image](logo/profile-report.png)
+
 ## Contributing
 
 Phenofhy is an internal beta and is evolving quickly. If you find a bug or want
