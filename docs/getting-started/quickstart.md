@@ -6,7 +6,7 @@ Phenofhy helps you extract, process, and summarize OFH phenotype data inside the
 
 - You are running inside the OFH TRE with the `dx` toolkit available.
 - `config.json` is available in `/mnt/project/helpers` (Phenofhy uses it to resolve files).
-- If you have not uploaded Phenofhy to the TRE yet, see the Installation page.
+- If you have not uploaded Phenofhy to the TRE yet, see the [Installation](/getting-started/installation/) page.
 
 ## Download Phenofhy into your JupyterLab session
 
