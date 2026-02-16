@@ -4,6 +4,11 @@ Phenofhy is designed to run in the Our Future Health TRE with DNAnexus tooling i
 
 ## Requirements
 
+- Working knowledge of `Python` is requried and an understanding of how to launch and run analyses in the Our Future Health DNAnexus platform using `JupyterLab`.
+- For reference, an overview of resources for getting up to speed with DNAnexus, the `dx toolkit`, and working on phenotypic data with `JupyterLab` is provided [here](https://github.com/studiovincentstraub/phenofhy/blob/main/resources/DNAnexus-links.md).
+
+## Requirements
+
 - All you need is an active OFH TRE project on the DNAnexus platform and working knowledge of how to use JupyterLab (see [Introduction to Jupyterlab](https://dnanexus.gitbook.io/ofh/jupyterlab/introduction-to-jupyterlab))
 - `DX_PROJECT_CONTEXT_ID` set (already configured automatically in the TRE).
 - It is recommened you configure a `config.json` file in `/mnt/project/helpers` with file IDs and base paths (see Installation).
