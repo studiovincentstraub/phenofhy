@@ -12,7 +12,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Support', link: '/support/bug-reports' },
+      { text: 'Community', link: '/support/community-thread' },
     ],
     socialLinks: [
       { icon: 'github', link: 'https://github.com/studiovincentstraub/phenofhy' }
@@ -49,6 +49,14 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Community & Support',
+        items: [
+          { text: 'Community thread', link: '/support/community-thread' },
+          { text: 'Bug Reports', link: '/support/bug-reports' },
+          { text: 'FAQ', link: '/support/faq' },
+        ]
+      },
+      {
         text: 'API Reference',
         items: [
           { text: 'Overview', link: '/api/' },
@@ -66,13 +74,6 @@ export default defineConfig({
           { text: '_filter_funcs', link: '/api/filter' },
         ]
       },
-      {
-        text: 'Support',
-        items: [
-          { text: 'FAQ', link: '/support/faq' },
-          { text: 'Bug Reports', link: '/support/bug-reports' },
-        ]
-      }
     ]
   }
 })
