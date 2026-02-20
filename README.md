@@ -2,7 +2,7 @@
 
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
-Python package for phenotype analysis in the Our Future Health (OFH) trusted
+Phenofhy (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
 research environment (TRE). Phenofhy is designed to make extraction, processing,
 and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is user-friendly, efficient and easy to install. Built for the OFH DNAnexus trusted research environment.
 
