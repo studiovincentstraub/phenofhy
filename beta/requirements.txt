@@ -1,0 +1,7 @@
+numpy>=1.26,<2.0
+pandas>=2.2,<2.3
+scipy>=1.11,<1.14
+matplotlib>=3.8,<3.10
+pyspark>=3.5,<4.0
+dxdata
+dxpy>=0.360,<0.400

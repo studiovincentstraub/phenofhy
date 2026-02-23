@@ -30,12 +30,22 @@ but the main workflows assume access to OFH datasets and the `dx` toolkit.
 Phenofhy is currently a beta package for the OFH TRE. There is no automated
 installer yet.
 
+Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
+
 1. Download a zip of the repository from GitHub:
    https://github.com/studiovincentstraub/Phenofhy
 2. Upload the `Phenofhy/` folder into the TRE using the Airlock process.
    Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
 3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
    update the IDs for your study (project IDs, cohorts, codings, dictionaries).
+4. Install Python dependencies from the repository root:
+
+    ```bash
+    pip install -r beta/requirements.txt
+    ```
+
+For stricter reproducibility across reruns, record your exact environment after
+installation (for example with `pip freeze > requirements-lock.txt`).
 
 Tip: when you upload the package, avoid nesting `Phenofhy` inside another
 `Phenofhy` folder. The TRE should contain a single `Phenofhy/` directory that
