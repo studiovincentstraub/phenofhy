@@ -1,4 +1,7 @@
-![cover image](logo/welcome-page.png)
+[![cover image][1]][2]
+
+[1]:  logo/welcome-page.png
+[2]:  https://studiovincentstraub.github.io/Phenofhy/ "Redirect to documentation"
 
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
