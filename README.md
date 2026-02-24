@@ -53,16 +53,16 @@ includes the beta modules, which can be optionally nested inside a `applets/` fo
 
 ## Documentation
 
-Explore the full Phenofhy documentation here: https://studiovincentstraub.github.io/Phenofhy/
+Explore the full Phenofhy documentation here: [https://studiovincentstraub.github.io/Phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
 
 Where to start on the documentation website?
 
-- New to Phenofhy or OFH phenotype analysis? Begin with "About" and then the
-	"Quickstart" for a smooth introduction.
-- Got your own data? After "About" and "Quickstart", you are ready to dive in
-	and start analyzing.
-- Looking for more? Check out the example workflows and API reference to deepen
-	your understanding.
+- New to Phenofhy or OFH phenotype analysis? Begin with "Getting Started" and then the
+	"Quickstart" for a smooth introduction, follwed by "Key Concepts".
+- Got your own data? After "Getting Started" and "Key Concepts", you are ready to dive in
+	and start analyzing but can use the "Tutorials" to help.
+- Looking for more? Check out "API reference" to deepen your understanding and the
+  "Community & Support" section to request features and join the discussion"
 
 ## Example workflow
 
