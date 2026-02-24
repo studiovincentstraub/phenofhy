@@ -41,12 +41,12 @@ export default defineConfig({
       {
         text: 'Tutorials',
         items: [
-          { text: 'Simulating data locally', link: '/tutorials/simulating-data-locally' },
           { text: 'Running a pipeline', link: '/concepts/tutorials' },
           { text: 'Profiling a phenotype', link: '/tutorials/profile' },
           { text: 'Calculating prevalence', link: '/tutorials/calculate' },
           { text: 'ICD phenotypes', link: '/tutorials/icd' },
           { text: 'TRE utilities', link: '/tutorials/utilities' },
+          { text: 'Simulating data locally', link: '/tutorials/simulating-data-locally' }
         ]
       },
       {
