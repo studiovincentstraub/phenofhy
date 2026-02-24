@@ -88,6 +88,7 @@ prev = prevalence(step_df)
 
 ## More tutorials
 
+- [Simulating data locally](/tutorials/simulating-data-locally)
 - [Profiling a Phenotype](/tutorials/profile)
 - [Calculating Summary Stats](/tutorials/calculate)
 - [ICD Phenotypes](/tutorials/icd)

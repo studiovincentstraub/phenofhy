@@ -1,7 +1,9 @@
 # Installation
 
-Phenofhy is currently a beta package designed to run inside the Our Future Health TRE.
-There is no automated installer yet; you must upload the package manually.
+Phenofhy is currently a beta package primarily designed to run inside the Our Future Health TRE.
+There is no automated installer yet; for TRE workflows you must upload the package manually.
+
+For local development and testing on simulated data, you can also use Phenofhy outside the TRE without Airlock.
 
 ## Step 1: Download the package
 
@@ -25,6 +27,8 @@ Summary of the modified ingress route:
 3. Airlock performs security checks and transfers files into a restricted project.
 4. Copy the approved files into your own restricted project and confirm completion.
 
+If you are only running local tests with simulated data, you can skip this Airlock step.
+
 ## Step 3: Set `config.json`
 
 Phenofhy expects a `config.json` file in the project helpers directory:
@@ -47,3 +51,5 @@ datasets and dictionary files are updated.
 ## After transfer
 
 Once the package and `config.json` are in place, you can follow the Quickstart.
+
+If you are testing locally, see the [Simulating data locally](/tutorials/simulating-data-locally) tutorial.

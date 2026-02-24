@@ -26,6 +26,10 @@ meta = load.metadata()
 # meta["codings"], meta["data_dictionary"], meta["entity_dictionary"]
 ```
 
-## TRE-only usage
+## Local testing outside TRE
 
-Phenofhy can in theory be used on similuated data outside the OFH TRE for local testing but it is intended to be run inside the TRE.
+Phenofhy is primarily intended for use inside the OFH TRE, but parts of the package can be developed and tested locally using simulated data.
+
+In particular, the simulation utilities let you generate OFH-like sample dataframes for debugging and pipeline prototyping without querying DNAnexus.
+
+TRE-specific functionality (for example, `dx`-dependent extraction and project-context dataset access) still requires a valid OFH TRE environment.

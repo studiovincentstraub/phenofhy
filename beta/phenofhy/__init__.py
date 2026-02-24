@@ -3,6 +3,7 @@ from . import (
     _filter_funcs,
     _rules,
     utils,
+    simulate,
     load,
     extract,
     icd,

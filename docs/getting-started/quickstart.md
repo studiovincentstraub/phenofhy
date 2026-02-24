@@ -1,12 +1,14 @@
 # Quickstart
 
-Phenofhy helps you extract, process, and summarize OFH phenotype data inside the TRE.
+Phenofhy helps you extract, process, and summarize OFH phenotype data inside the TRE, and also supports local testing on simulated data.
 
 ## Prerequisites
 
 - You are running inside the OFH TRE with the `dx` toolkit available.
 - `config.json` is available in `/mnt/project/helpers` (Phenofhy uses it to resolve files).
 - If you have not uploaded Phenofhy to the TRE yet, see the [Installation](/getting-started/installation) page.
+
+For local testing, you can skip TRE prerequisites and start with simulated data (see [Simulating data locally](/tutorials/simulating-data-locally)).
 
 ## Download Phenofhy into your JupyterLab session
 
@@ -68,3 +70,19 @@ report = utils.upload_files(
 - Use `calculate.prevalence()` for prevalence tables.
 - Use `icd.match_icd_traits()` to match ICD codes to traits.
 - Use `process.questionnaire_fields()` or `process.clinic_measurements_fields()` to work by entity.
+
+## Local quick test (no TRE access required)
+
+```python
+from phenofhy.simulate import simulate_phenotype_df
+from phenofhy import process, calculate
+
+df = simulate_phenotype_df(sample=1000, seed=42)
+df = process.participant_fields(df)
+
+summary = calculate.summary(
+    df,
+    traits=["derived.age_at_registration", "derived.sex"],
+    stratify="derived.sex",
+)
+```

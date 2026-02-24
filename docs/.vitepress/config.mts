@@ -41,6 +41,7 @@ export default defineConfig({
       {
         text: 'Tutorials',
         items: [
+          { text: 'Simulating data locally', link: '/tutorials/simulating-data-locally' },
           { text: 'Running a pipeline', link: '/concepts/tutorials' },
           { text: 'Profiling a phenotype', link: '/tutorials/profile' },
           { text: 'Calculating prevalence', link: '/tutorials/calculate' },
