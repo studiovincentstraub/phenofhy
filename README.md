@@ -1,4 +1,4 @@
-![cover image](logo/phenofhy-logo.png)
+![cover image](logo/welcome-page.png)
 
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
