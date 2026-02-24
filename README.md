@@ -1,7 +1,7 @@
 [![cover image][1]][2]
 
 [1]:  logo/welcome-page.png
-[2]:  https://studiovincentstraub.github.io/Phenofhy/ "Redirect to documentation"
+[2]:  https://studiovincentstraub.github.io/phenofhy/ "Redirect to documentation"
 
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
@@ -56,7 +56,7 @@ includes the beta modules, which can be optionally nested inside a `applets/` fo
 
 ## Documentation
 
-Explore the full Phenofhy documentation here: [https://studiovincentstraub.github.io/Phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
+Explore the full Phenofhy documentation here: [https://studiovincentstraub.github.io/phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
 
 Where to start on the documentation website?
 
