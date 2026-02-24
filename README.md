@@ -38,7 +38,7 @@ Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
    Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
 3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
    update the IDs for your study (project IDs, cohorts, codings, dictionaries).
-4. Install Python dependencies from the repository root:
+4. Install Python dependencies from the repository root (if you plan to use Phenofhy locally):
 
     ```bash
     pip install -r beta/requirements.txt
