@@ -3,12 +3,13 @@ import json
 import logging
 import subprocess
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Union, Literal
 
 import pandas as pd
 
 # --- Local imports ---
 from .utils import find_latest_dx_file_id, get_dataset_id, load_file
+from . import extract, process
 
 # --- CONFIG ---
 CONFIG_FILENAME = "config.json"
@@ -46,6 +47,66 @@ def metadata() -> Dict[str, pd.DataFrame]:
         dfs[key] = df
 
     return dfs
+
+
+def run_preprocessing_pipeline(
+    fields: Union[List[str], dict],
+    cohort_key: str = "FULL_SAMPLE_ID",
+    derive_participant: bool = True,
+    derive_questionnaire: bool = True,
+    derive_questionnaire_mode: Literal["all", "auto"] = "auto",
+    derive_clinic: bool = True,
+) -> pd.DataFrame:
+    """Extract and preprocess data with automatic field derivation.
+
+    This high-level function orchestrates the full phenotype preprocessing pipeline:
+    extracting fields from DNAnexus, then applying entity-specific derivations.
+
+    Args:
+        fields: List of "entity.field" strings or dict of entity->field mappings.
+        cohort_key: Config key for the cohort dataset ID.
+        derive_participant: Whether to derive participant fields (age groups, etc.).
+        derive_questionnaire: Whether to derive questionnaire fields.
+        derive_questionnaire_mode: Derivation mode for questionnaire ("all" or "auto").
+        derive_clinic: Whether to derive clinic measurement fields (BMI, etc.).
+
+    Returns:
+        Processed DataFrame ready for analysis.
+
+    Raises:
+        RuntimeError: If extraction or processing fails.
+        ValueError: If fields format is unsupported.
+    """
+    logger.info("Starting preprocessing pipeline...")
+
+    # 1) Extract fields from DNAnexus
+    logger.info(f"Extracting {len(fields) if isinstance(fields, (list, dict)) else 'specified'} fields...")
+    df = extract.fields(
+        fields=fields,
+        cohort_key=cohort_key,
+    )
+    logger.info(f"Extracted data: {df.shape[0]} rows, {df.shape[1]} columns")
+
+    # 2) Process participant fields
+    if derive_participant:
+        logger.info("Deriving participant fields...")
+        df = process.participant_fields(df, derive="auto")
+        logger.info(f"After participant derivation: {df.shape[1]} columns")
+
+    # 3) Process questionnaire fields
+    if derive_questionnaire:
+        logger.info(f"Deriving questionnaire fields (mode={derive_questionnaire_mode})...")
+        df = process.questionnaire_fields(df, derive=derive_questionnaire_mode)
+        logger.info(f"After questionnaire derivation: {df.shape[1]} columns")
+
+    # 4) Process clinic measurement fields
+    if derive_clinic:
+        logger.info("Deriving clinic measurement fields...")
+        df = process.clinic_measurements_fields(df, derive="auto")
+        logger.info(f"After clinic measurement derivation: {df.shape[1]} columns")
+
+    logger.info(f"Pipeline complete: {df.shape[0]} rows, {df.shape[1]} columns")
+    return df
 
 
 def _download_metadata_files() -> Dict[str, Path]:
