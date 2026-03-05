@@ -22,6 +22,58 @@ Load metadata dictionary files into DataFrames.
 &nbsp;&nbsp;**FileNotFoundError**: ***Exception***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If an expected file path does not exist.
 
+## run_preprocessing_pipeline()
+
+```python
+phenofhy.pipeline.run_preprocessing_pipeline(fields, cohort_key="FULL_SAMPLE_ID",
+	derive_participant=True, derive_questionnaire=True,
+	derive_questionnaire_mode="auto", derive_clinic=True)
+```
+
+Extract and preprocess data with automatic field derivation.
+
+This high-level function orchestrates the full phenotype preprocessing pipeline:
+extracting fields from DNAnexus, then applying entity-specific derivations.
+
+**Parameters**
+
+&nbsp;&nbsp;**fields**: ***list[str] | dict[str, str]***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List of "entity.field" strings or dict of entity->field mappings.<br>
+&nbsp;&nbsp;**cohort_key**: ***str***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Config key for the cohort dataset ID. Default: `"FULL_SAMPLE_ID"`.<br>
+&nbsp;&nbsp;**derive_participant**: ***bool***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whether to derive participant fields (age groups, etc.). Default: `True`.<br>
+&nbsp;&nbsp;**derive_questionnaire**: ***bool***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whether to derive questionnaire fields. Default: `True`.<br>
+&nbsp;&nbsp;**derive_questionnaire_mode**: ***"all" | "auto"***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Derivation mode for questionnaire. Default: `"auto"`.<br>
+&nbsp;&nbsp;**derive_clinic**: ***bool***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Whether to derive clinic measurement fields (BMI, etc.). Default: `True`.<br>
+
+**Returns**
+
+&nbsp;&nbsp;**out**: ***pandas.DataFrame***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Processed DataFrame ready for analysis.
+
+**Raises**
+
+&nbsp;&nbsp;**RuntimeError**: ***Exception***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If extraction or processing fails.<br>
+&nbsp;&nbsp;**ValueError**: ***Exception***<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If fields format is unsupported.
+
+**Example**
+```python
+from phenofhy import pipeline
+
+# Extract and preprocess specific fields
+df = pipeline.run_preprocessing_pipeline(
+    fields=["participant.birth_year", "participant.birth_month"],
+    derive_participant=True,
+    derive_questionnaire=True,
+)
+```
+
 ## field_list()
 
 ```python
