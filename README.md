@@ -18,7 +18,7 @@ and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is 
 - Easily extract and preprocess phenotype data in a few lines of intuitive code.
 - Quick summaries and basic phenotype profile reporting to validate data early.
 
-_The `phenofhy` package is developed by Vincent Straub at the University of Oxford and is not affiliated with the Our Future Health research programme_
+_The `phenofhy` package is developed by Vincent Straub within the [Leverhulme Centre for Demographic Science](https://www.demography.ox.ac.uk/) the University of Oxford and is not affiliated with the Our Future Health research programme_
 
 ## Target users
 
