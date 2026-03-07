@@ -3,6 +3,8 @@
 [1]:  logo/welcome-page.png
 [2]:  https://studiovincentstraub.github.io/phenofhy/ "Redirect to documentation"
 
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
+
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
 `phenofhy` (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
