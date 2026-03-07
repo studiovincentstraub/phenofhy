@@ -57,3 +57,7 @@ Curated guides and tutorials for researchers working within the UK Biobank Resea
 - [Creating apps and bringing custom tools to the UKB-RAP](https://www.youtube.com/watch?v=A_iki_50Ig0) — Packaging your own software for use within the TRE
 - [Introduction to WDL on the UKB-RAP](https://www.youtube.com/watch?v=2X3gbS_BHiA) — Workflow Description Language basics for pipeline development
 - [Advanced WDL and Docker on the UKB-RAP](https://www.youtube.com/watch?v=vyzYChm0e1g) — Containerised workflows and advanced pipeline concepts
+
+---
+
+> **Note:** This resource list is maintained by Vincent Straub at the [Leverhulme Centre for Demographic Science](https://www.demography.ox.ac.uk/), University of Oxford. It is not affiliated with, endorsed by, or maintained by DNAnexus, UK Biobank, or Our Future Health.
