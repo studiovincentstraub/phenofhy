@@ -3,7 +3,8 @@
 [1]:  logo/welcome-page.png
 [2]:  https://studiovincentstraub.github.io/phenofhy/ "Redirect to documentation"
 
-[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
+
 
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
