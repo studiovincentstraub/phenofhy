@@ -3,18 +3,23 @@
 [1]:  logo/welcome-page.png
 [2]:  https://studiovincentstraub.github.io/phenofhy/ "Redirect to documentation"
 
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
+
+
 # Phenofhy (beta): The Python package to process pheno data in Our Future Health
 
-Phenofhy (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
-research environment (TRE). Phenofhy is designed to make extraction, processing,
+`phenofhy` (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
+research environment (TRE). `phenofhy` is designed to make extraction, processing,
 and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is user-friendly, efficient and easy to install. Built for the OFH DNAnexus trusted research environment.
 
 
-## Why Phenofhy
+## Why `phenofhy`
 
 - Purpose-built for the OFH TRE and DNAnexus tooling.
 - Easily extract and preprocess phenotype data in a few lines of intuitive code.
 - Quick summaries and basic phenotype profile reporting to validate data early.
+
+_The `phenofhy` package is developed by Vincent Straub within the [Leverhulme Centre for Demographic Science](https://www.demography.ox.ac.uk/) at the University of Oxford and is not affiliated with the Our Future Health research programme_
 
 ## Target users
 
@@ -24,24 +29,24 @@ and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is 
 
 ## Environment
 
-Phenofhy is designed to run inside the OFH TRE with DNAnexus tooling and
+`phenofhy` is designed to run inside the OFH TRE with DNAnexus tooling and
 JupyterLab. It can be used on simulated data outside the TRE for local testing,
 but the main workflows assume access to OFH datasets and the `dx` toolkit.
 
 ## Installation (TRE)
 
-Phenofhy is currently a beta package for the OFH TRE. There is no automated
+`phenofhy` is currently a beta package for the OFH TRE. There is no automated
 installer yet.
 
 Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
 
 1. Download a zip of the repository from GitHub:
-   https://github.com/studiovincentstraub/Phenofhy
+   https://github.com/studiovincentstraub/phenofhy
 2. Upload the `Phenofhy/` folder into the TRE using the Airlock process.
    Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
 3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
    update the IDs for your study (project IDs, cohorts, codings, dictionaries).
-4. Install Python dependencies from the repository root (if you plan to use Phenofhy locally):
+4. Install Python dependencies from the repository root (if you plan to use `phenofhy` locally):
 
     ```bash
     pip install -r beta/requirements.txt
@@ -56,11 +61,11 @@ includes the beta modules, which can be optionally nested inside a `applets/` fo
 
 ## Documentation
 
-Explore the full Phenofhy documentation here: [https://studiovincentstraub.github.io/phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
+Explore the full `phenofhy` documentation here: [https://studiovincentstraub.github.io/phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
 
 Where to start on the documentation website?
 
-- New to Phenofhy or OFH phenotype analysis? Begin with "Getting Started" and then the
+- New to `phenofhy` or OFH phenotype analysis? Begin with "Getting Started" and then the
 	"Quickstart" for a smooth introduction, follwed by "Key Concepts".
 - Got your own data? After "Getting Started" and "Key Concepts", you are ready to dive in
 	and start analyzing but can use the "Tutorials" to help.
@@ -117,7 +122,7 @@ Below is a phenotype profile report (using simulated data).
 
 ## Contributing
 
-Phenofhy is an internal beta and is evolving quickly. If you find a bug or want
+`phenofhy` is in beta and is evolving quickly. If you find a bug or want
 to suggest an improvement, open an issue or start a discussion in the
 repository. 
 
