@@ -66,6 +66,7 @@ export default defineConfig({
           { text: 'extract', link: '/api/extract' },
           { text: 'process', link: '/api/process' },
           { text: 'calculate', link: '/api/calculate' },
+          { text: 'simulate', link: '/api/simulate' },
           { text: 'profile', link: '/api/profile' },
           { text: 'icd', link: '/api/icd' },
           { text: 'display', link: '/api/display' },

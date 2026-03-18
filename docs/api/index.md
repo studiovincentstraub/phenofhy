@@ -8,6 +8,7 @@ Phenofhy is organized by workflow stage. Each module provides a small set of fun
 - `extract`: dataset extraction and SQL helpers
 - `process`: entity-specific processing and derivations
 - `calculate`: summary and prevalence statistics
+- `simulate`: synthetic phenotype dataframe generation utilities
 - `profile`: phenotype profile report
 - `icd`: ICD trait matching (pandas and Spark)
 - `display`: formatting helpers for categorical summaries
