@@ -2,14 +2,38 @@
 
 Synthetic phenotype dataframe generation utilities for local testing and examples.
 
+The code blocks on this page show copy-paste-safe call patterns. In the actual Python signature, some parameters are keyword-only.
+
 ## simulate_phenotype_df()
 
 ```python
-phenofhy.simulate.simulate_phenotype_df(sample=1000, fields=None, *,
+phenofhy.simulate.simulate_phenotype_df(sample=1000, fields=None,
 	include_nonresponse=False, missing_rate=None, seed=None)
 ```
 
 Simulate an OFH-like phenotype dataframe from metadata dictionaries and coding domains.
+
+In the implementation, `include_nonresponse`, `missing_rate`, and `seed` are keyword-only parameters.
+
+If `fields` is None, the function uses `DEFAULT_FIELDS`. You can also request other valid `entity.field` names present in `beta/helpers/data_dictionary.csv`. For non-default fields, realism depends on the available metadata: coded fields use values from `codings.csv`, numeric fields without a coding domain use conservative fallback ranges, and unrecognized dtypes return all-missing values.
+
+When `fields` is None, the default columns are:
+
+- `participant.pid`
+- `participant.birth_year`
+- `participant.birth_month`
+- `participant.registration_year`
+- `participant.registration_month`
+- `participant.demog_sex_1_1`
+- `participant.demog_sex_2_1`
+- `participant.demog_ethnicity_1_1`
+- `questionnaire.demog_height_1_1`
+- `questionnaire.smoke_status_2_1`
+- `clinic_measurements.waist`
+- `clinic_measurements.height`
+- `clinic_measurements.weight`
+- `questionnaire.alcohol_curr_1_1`
+- `clinic_measurements.heart_first_rate`
 
 **Parameters**
 
@@ -37,6 +61,8 @@ Simulate an OFH-like phenotype dataframe from metadata dictionaries and coding d
 **Example**
 ```python
 from phenofhy import simulate
+
+df_default = simulate.simulate_phenotype_df()
 
 df = simulate.simulate_phenotype_df(
     sample=500,
@@ -143,10 +169,12 @@ Filter out known non-response codes for a coded field when requested.
 ## _simulate_column()
 
 ```python
-phenofhy.simulate._simulate_column(*, field, dtype, sample, rng, coded_domains)
+phenofhy.simulate._simulate_column(field, dtype, sample, rng, coded_domains)
 ```
 
 Generate a synthetic column for one field using coded domains or dtype-specific fallbacks.
+
+In the implementation, all parameters are keyword-only.
 
 **Parameters**
 
@@ -169,10 +197,12 @@ Generate a synthetic column for one field using coded domains or dtype-specific 
 ## _apply_missingness()
 
 ```python
-phenofhy.simulate._apply_missingness(col, *, field, missing_rate, rng)
+phenofhy.simulate._apply_missingness(col, field, missing_rate, rng)
 ```
 
 Apply field-level missingness to a simulated column.
+
+In the implementation, `field`, `missing_rate`, and `rng` are keyword-only parameters.
 
 **Parameters**
 
