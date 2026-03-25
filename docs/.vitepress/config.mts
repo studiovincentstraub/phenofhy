@@ -26,9 +26,9 @@ export default defineConfig({
         text: 'Getting Started',
         items: [
           { text: 'Environment & Setup', link: '/getting-started/environment' },
+          { text: 'DNAnexus', link: '/getting-started/dnanexus' },
           { text: 'Installation', link: '/getting-started/installation' },
           { text: 'Quickstart', link: '/getting-started/quickstart' },
-          { text: 'DNAnexus', link: '/getting-started/dnanexus' },
         ]
       },
       {

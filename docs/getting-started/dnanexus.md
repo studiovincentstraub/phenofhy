@@ -1,8 +1,8 @@
-# DNAnexus Learning Resources
+# DNAnexus learning resources
 
-Curated guides and tutorials for researchers working within the the Our Future Health Trusted Research Environment (OFH-TRE) that wish to develop their pre-requisite knowledge.
+This page builds on the [Environment and setup](/getting-started/environment) guide with external resources for learning the DNAnexus platform and TRE workflows.
 
-Use these resources when setting up or extending TRE workflows alongside Phenofhy.
+Use it to strengthen prerequisite skills before running or extending Phenofhy analyses.
 
 ## Prerequisites
 
