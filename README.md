@@ -42,7 +42,7 @@ Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
 
 1. Download a zip of the repository from GitHub:
    https://github.com/studiovincentstraub/phenofhy
-2. Upload the `Phenofhy/` folder into the TRE using the Airlock process.
+2. Upload the (unzipped) `Phenofhy/` folder into the TRE using the Airlock process.
    Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
 3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
    update the IDs for your study (project IDs, cohorts, codings, dictionaries).

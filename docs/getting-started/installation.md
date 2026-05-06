@@ -21,7 +21,7 @@ The Airlock team will guide you through each stage as the request is processed.
 
 Summary of the modified ingress route:
 
-1. Upload the package to an unrestricted project in the OFH TRE.
+1. Upload the (unzipped) package to an unrestricted project in the OFH TRE.
 2. Submit an import request and follow Airlock instructions:
    https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
 3. Airlock performs security checks and transfers files into a restricted project.
