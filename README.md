@@ -1,6 +1,6 @@
 ![cover image][1]
 
-[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
 
 # Phenofhy: The Python package to process phenotype data in Our Future Health
 
