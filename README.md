@@ -1,4 +1,4 @@
-![cover image][1]
+![Phenofhy cover](https://raw.githubusercontent.com/studiovincentstraub/phenofhy/main/logo/welcome-page.png)
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
 
@@ -128,6 +128,3 @@ Below is a phenotype profile report (using simulated data).
 
 If you find a bug or want to suggest an improvement, open an issue or start a
 discussion in the repository.
-
-[1]: logo/welcome-page.png
-[2]: https://studiovincentstraub.github.io/phenofhy/
