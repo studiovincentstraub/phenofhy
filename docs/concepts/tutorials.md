@@ -34,7 +34,7 @@ fields = [
 
 df = run_preprocessing_pipeline(
     fields=fields,
-    cohort_key="FULL_SAMPLE_ID",
+    cohort_key="FULL_SAMPLE",
     derive_participant=True,
     derive_questionnaire=True,
     derive_questionnaire_mode="auto",
@@ -74,7 +74,7 @@ sql_path = "outputs/raw/demo_query.sql"
 extract.fields(
     input_file=fieldlist_path,
     output_file=sql_path,
-    cohort_key="FULL_SAMPLE_ID",
+    cohort_key="FULL_SAMPLE",
     sql_only=True,
 )
 

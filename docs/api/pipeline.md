@@ -25,7 +25,7 @@ Load metadata dictionary files into DataFrames.
 ## run_preprocessing_pipeline()
 
 ```python
-phenofhy.pipeline.run_preprocessing_pipeline(fields, cohort_key="FULL_SAMPLE_ID",
+phenofhy.pipeline.run_preprocessing_pipeline(fields, cohort_key="FULL_SAMPLE",
 	derive_participant=True, derive_questionnaire=True,
 	derive_questionnaire_mode="auto", derive_clinic=True)
 ```
@@ -40,7 +40,7 @@ extracting fields from DNAnexus, then applying entity-specific derivations.
 &nbsp;&nbsp;**fields**: ***list[str] | dict[str, str]***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;List of "entity.field" strings or dict of entity->field mappings.<br>
 &nbsp;&nbsp;**cohort_key**: ***str***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Config key for the cohort dataset ID. Default: `"FULL_SAMPLE_ID"`.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Config key for the cohort dataset ID. Default: `"FULL_SAMPLE"`.<br>
 &nbsp;&nbsp;**derive_participant**: ***bool***<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Whether to derive participant fields (age groups, etc.). Default: `True`.<br>
 &nbsp;&nbsp;**derive_questionnaire**: ***bool***<br>

@@ -1,17 +1,12 @@
-[![cover image][1]][2]
+[cover image][2]
 
-[1]:  logo/welcome-page.png
-[2]:  https://studiovincentstraub.github.io/phenofhy/ "Redirect to documentation"
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
 
-[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
-
-
-# Phenofhy (beta): The Python package to process pheno data in Our Future Health
+# Phenofhy: The Python package to process phenotype data in Our Future Health
 
 `phenofhy` (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
 research environment (TRE). `phenofhy` is designed to make extraction, processing,
 and reporting of OFH phenotype data quick and repeatable inside DNAnexus. It is user-friendly, efficient and easy to install. Built for the OFH DNAnexus trusted research environment.
-
 
 ## Why `phenofhy`
 
@@ -33,42 +28,51 @@ _The `phenofhy` package is developed by Vincent Straub within the [Leverhulme Ce
 JupyterLab. It can be used on simulated data outside the TRE for local testing,
 but the main workflows assume access to OFH datasets and the `dx` toolkit.
 
-## Installation (TRE)
+## Installation
 
-`phenofhy` is currently a beta package for the OFH TRE. There is no automated
-installer yet.
+If testing out the package locally, install the released package with `pip`:
+
+```bash
+python -m pip install phenofhy
+```
+
+For development from a source checkout:
+
+```bash
+python -m pip install -e .
+```
 
 Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
 
-1. Download a zip of the repository from GitHub:
-   https://github.com/studiovincentstraub/phenofhy
-2. Upload the (unzipped) `Phenofhy/` folder into the TRE using the Airlock process.
-   Guidance: https://dnanexus.gitbook.io/ofh/airlock/importing-files-into-a-restricted-project
-3. Copy `beta/Phenofhy/config.json` into `/mnt/project/helpers/config.json` and
-   update the IDs for your study (project IDs, cohorts, codings, dictionaries).
-4. Install Python dependencies from the repository root (if you plan to use `phenofhy` locally):
+## Initialize a TRE project
 
-    ```bash
-    pip install -r beta/requirements.txt
-    ```
+To use the package inside a configured DNAnexus TRE JupyterLab session, initialize Phenofhy once for the project:
 
-For stricter reproducibility across reruns, record your exact environment after
-installation (for example with `pip freeze > requirements-lock.txt`).
+```python
+import phenofhy
 
-Tip: when you upload the package, avoid nesting `Phenofhy` inside another
-`Phenofhy` folder. The TRE should contain a single `Phenofhy/` directory that
-includes the beta modules, which can be optionally nested inside a `applets/` folder.
+phenofhy.init()
+```
 
-## Documentation
+Initialization discovers the current project and dataset, extracts the OFH metadata dictionaries, uploads those files to the project, and creates a project configuration. The configuration is uploaded to the remote `phenofhy/` folder. Later sessions can simply import and use Phenofhy; the configuration is downloaded automatically when it is not present locally.
+
+Initialization requires:
+
+- Python 3.10 or newer;
+- the DNAnexus `dx` toolkit installed and authenticated;
+- `DX_PROJECT_CONTEXT_ID` set by the TRE environment;
+- permission to read the selected dataset and upload files to the project.
+
+Documentation
 
 Explore the full `phenofhy` documentation here: [https://studiovincentstraub.github.io/phenofhy/](https://studiovincentstraub.github.io/phenofhy/)
 
 Where to start on the documentation website?
 
 - New to `phenofhy` or OFH phenotype analysis? Begin with "Getting Started" and then the
-	"Quickstart" for a smooth introduction, follwed by "Key Concepts".
+  "Quickstart" for a smooth introduction, followed by "Key Concepts".
 - Got your own data? After "Getting Started" and "Key Concepts", you are ready to dive in
-	and start analyzing but can use the "Tutorials" to help.
+  and start analyzing but can use the "Tutorials" to help.
 - Looking for more? Check out "API reference" to deepen your understanding and the
   "Community & Support" section to request features and join the discussion"
 
@@ -116,13 +120,14 @@ report = utils.upload_files(
 
 ## Example output
 
-Below is a phenotype profile report (using simulated data). 
+Below is a phenotype profile report (using simulated data).
 
 ![cover image](logo/profile-report.png)
 
 ## Contributing
 
-`phenofhy` is in beta and is evolving quickly. If you find a bug or want
-to suggest an improvement, open an issue or start a discussion in the
-repository. 
+If you find a bug or want to suggest an improvement, open an issue or start a
+discussion in the repository.
 
+[1]: logo/welcome-page.png
+[2]: https://studiovincentstraub.github.io/phenofhy/

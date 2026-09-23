@@ -1,7 +1,7 @@
 # Bug reports
 
-Phenofhy is a beta package. Functions and error handling are still being refined, so
-you may encounter breaking changes or inconsistent behaviors.
+Phenofhy is released as version 1.0. Please report reproducible bugs so they
+can be investigated and corrected.
 
 ## Where to report issues
 

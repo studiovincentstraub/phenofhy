@@ -1,13 +1,19 @@
 # FAQ
 
-## Do I need to upload Phenofhy manually to the TRE?
+## How do I install Phenofhy?
 
-Yes. Phenofhy is currently a beta package and must be uploaded to the OFH TRE manually
-(using the Airlock process). There is no automated installer yet, as OFH doesn't yet allow access to package repositories like PyPI.
+Install it from PyPI when the TRE permits package installation:
+
+```bash
+python -m pip install phenofhy
+```
+
+If the TRE cannot access PyPI, transfer the wheel through the Airlock process.
 
 ## Where does `config.json` live?
 
-Phenofhy expects `config.json` at `/mnt/project/helpers/config.json`.
+Run `phenofhy.init()` once. It creates a local config in the notebook working
+directory and uploads the project copy to `phenofhy/config.json`.
 
 ## Do I need the `dx` CLI?
 
@@ -15,8 +21,9 @@ Yes. Phenofhy relies on DNAnexus tools for dataset access and metadata downloads
 
 ## What if my cohort key is missing?
 
-`config.json` controls cohort keys under `COHORTS`. Add or update the key for your
-study before running extraction.
+The generated `config.json` controls cohort keys under `COHORTS`. The default
+dataset is available as `COHORTS["FULL_SAMPLE"]`; pass another cohort key when
+using a custom configuration.
 
 ## Where are metadata dictionaries stored?
 

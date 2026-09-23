@@ -4,20 +4,24 @@ Phenofhy is designed to run in the Our Future Health (OFH) trusted research envi
 
 ## Prerequisites
 
-- Working knowledge of `Python` is requried and an understanding of how to launch and run analyses in the Our Future Health DNAnexus TRE using `JupyterLab`.
+- Working knowledge of `Python` is required, along with an understanding of how to launch and run analyses in the Our Future Health DNAnexus TRE using `JupyterLab`.
 - For reference, an overview of resources for getting up to speed with DNAnexus TRE, the `dx toolkit`, and working on phenotypic data with `JupyterLab` is provided on the [DNAnexus Learning Resources](/getting-started/dnanexus) page.
 
 ## Requirements
 
 - All you need is an active OFH TRE project on the DNAnexus platform and working knowledge of how to use JupyterLab (see [Introduction to Jupyterlab](https://dnanexus.gitbook.io/ofh/jupyterlab/introduction-to-jupyterlab))
 - `DX_PROJECT_CONTEXT_ID` set (already configured automatically in the TRE).
-- It is recommened you configure a `config.json` file in `/mnt/project/helpers` with file IDs and base paths (see Installation).
+- Run `phenofhy.init()` once to create and upload the project configuration and metadata files (see Installation).
 
 ## Metadata files
 
 Phenofhy can automatically create the [metadata files](https://ourfuturehealth.gitbook.io/our-future-health/data/participant-data#what-metadata-is-available-to-help-document-the-data-release) (codings, data_dictionary, entity_dictionary) that come with OFH and which can also be created with `dx` (see [documentation provided by UK Biobank](https://dnanexus.gitbook.io/uk-biobank-rap/working-on-the-research-analysis-platform/accessing-data/accessing-phenotypic-data#programatically)).
 
 The helper `load.metadata()` downloads them into `./metadata` if missing.
+
+The generated configuration is stored remotely in the project under
+`phenofhy/config.json` and is downloaded automatically in a new notebook
+session when no local config is present.
 
 ```python
 from phenofhy import load

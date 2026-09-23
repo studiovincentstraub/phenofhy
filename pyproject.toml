@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phenofhy"
+version = "1.0.0"
+description = "Tools for processing and analysing phenotype data in the Our Future Health TRE"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26,<2.0",
+    "pandas>=2.2,<2.3",
+    "scipy>=1.11,<1.14",
+    "matplotlib>=3.8,<3.10",
+    "pyspark>=3.5,<4.0",
+    "dxdata",
+    "dxpy>=0.360,<0.400",
+    "tqdm>=4.66",
+]
+authors = [
+    { name = "Vincent Straub", email = "vincent.straub@ndph.ox.ac.uk" }
+]
+
+license = { file = "LICENSE" }
+
+[project.urls]
+Homepage = "https://studiovincentstraub.github.io/phenofhy/"
+Repository = "https://github.com/studiovincentstraub/phenofhy"
+Documentation = "https://studiovincentstraub.github.io/phenofhy/"
+Issues = "https://github.com/studiovincentstraub/phenofhy/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["phenofhy*"]

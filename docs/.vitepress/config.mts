@@ -42,6 +42,7 @@ export default defineConfig({
       {
         text: 'Tutorials',
         items: [
+          { text: 'Processing phenotypes', link: '/tutorials/processing-phenotypes' },
           { text: 'Running a pipeline', link: '/concepts/tutorials' },
           { text: 'Profiling a phenotype', link: '/tutorials/profile' },
           { text: 'Calculating prevalence', link: '/tutorials/calculate' },

@@ -15,7 +15,7 @@ Simulate an OFH-like phenotype dataframe from metadata dictionaries and coding d
 
 In the implementation, `include_nonresponse`, `missing_rate`, and `seed` are keyword-only parameters.
 
-If `fields` is None, the function uses `DEFAULT_FIELDS`. You can also request other valid `entity.field` names present in `beta/helpers/data_dictionary.csv`. For non-default fields, realism depends on the available metadata: coded fields use values from `codings.csv`, numeric fields without a coding domain use conservative fallback ranges, and unrecognized dtypes return all-missing values.
+If `fields` is None, the function uses `DEFAULT_FIELDS`. You can also request other valid `entity.field` names present in the metadata available to the installed package. For non-default fields, realism depends on the available metadata: coded fields use values from `codings.csv`, numeric fields without a coding domain use conservative fallback ranges, and unrecognized dtypes return all-missing values.
 
 When `fields` is None, the default columns are:
 
@@ -106,7 +106,7 @@ Resolve the helpers directory path used by metadata loaders.
 **Returns**
 
 &nbsp;&nbsp;**out**: ***pathlib.Path***<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Absolute path to beta/helpers.
+&nbsp;&nbsp;&nbsp;&nbsp;Absolute path to the package metadata directory.
 
 ## _data_dictionary()
 

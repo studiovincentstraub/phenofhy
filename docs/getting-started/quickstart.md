@@ -5,22 +5,24 @@ Phenofhy helps you extract, process, and summarize OFH phenotype data inside the
 ## Prerequisites
 
 - You are running inside the OFH TRE with the `dx` toolkit available.
-- `config.json` is available in `/mnt/project/helpers` (Phenofhy uses it to resolve files).
+- Phenofhy is installed in the notebook environment.
+- `phenofhy.init()` has been run once for the current DNAnexus project.
 - If you have not uploaded Phenofhy to the TRE yet, see the [Installation](/getting-started/installation) page.
 
 For local testing, you can skip TRE prerequisites and start with simulated data (see [Simulating data locally](/tutorials/simulating-data-locally)).
 
-## Download Phenofhy into your JupyterLab session
+## Initialize Phenofhy
 
-Before running the workflow, download the Phenofhy package into your JupyterLab
-Spark instance using `dx`. Replace `project_name` with your TRE project name:
+Run this once per DNAnexus project:
 
 ```python
-!dx download "project_name:/applets/phenofhy/" -r
+import phenofhy
+
+phenofhy.init()
 ```
 
-This assumes Phenofhy was uploaded under the `applets` folder and contains the
-beta source code (i.e., Python modules).
+In later sessions, start with `import phenofhy`; the project configuration is
+downloaded automatically when needed.
 
 ## Minimal workflow
 
