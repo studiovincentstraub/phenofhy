@@ -22,7 +22,7 @@ authors = [
     { name = "Vincent Straub", email = "vincent.straub@ndph.ox.ac.uk" }
 ]
 
-license = { file = "LICENSE" }
+license = { file = "LICENSE.md" }
 
 [project.urls]
 Homepage = "https://studiovincentstraub.github.io/phenofhy/"
