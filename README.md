@@ -2,7 +2,14 @@
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) [![DOI](https://zenodo.org/badge/147731955.svg)]([https://zenodo.org/badge/latestdoi/147731955](https://zenodo.org/records/18984385))
 
+<<<<<<< HEAD
 # Phenofhy: The Python package to process phenotype data in Our Future Health
+=======
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
+
+
+# Phenofhy (beta): The Python package to process pheno data in Our Future Health
+>>>>>>> 09ae973292cdecb1b5d461761875e95aedb58822
 
 `phenofhy` (pronounced, fee-no-fi) Python package for phenotype analysis in the Our Future Health (OFH) trusted
 research environment (TRE). `phenofhy` is designed to make extraction, processing,
