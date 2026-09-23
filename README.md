@@ -122,7 +122,7 @@ report = utils.upload_files(
 
 Below is a phenotype profile report (using simulated data).
 
-![cover image](logo/profile-report.png)
+![Phenofhy profile report](https://raw.githubusercontent.com/studiovincentstraub/phenofhy/main/logo/profile-report.png)
 
 ## Contributing
 

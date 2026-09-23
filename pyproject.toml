@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phenofhy"
-version = "1.0.1"
+version = "1.0.2"
 description = "Tools for processing and analysing phenotype data in the Our Future Health TRE"
 readme = "README.md"
 requires-python = ">=3.10"
