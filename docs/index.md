@@ -32,19 +32,19 @@ features:
 <section class="getting-started-section">
   <h2>Getting Started</h2>
   <div class="getting-started-grid">
-    <a class="getting-started-card" href="/getting-started/environment">
+    <a class="getting-started-card" href="/phenofhy/getting-started/environment">
       <h3>1️⃣ Environment &amp; Setup</h3>
       <p>Review the TRE, Python, and DNAnexus requirements before using Phenofhy.</p>
     </a>
-    <a class="getting-started-card" href="/getting-started/dnanexus">
+    <a class="getting-started-card" href="/phenofhy/getting-started/dnanexus">
       <h3>2️⃣ DNAnexus</h3>
       <p>Learn the project, dataset, and JupyterLab concepts behind the workflow.</p>
     </a>
-    <a class="getting-started-card" href="/getting-started/installation">
+    <a class="getting-started-card" href="/phenofhy/getting-started/installation">
       <h3>3️⃣ Installation</h3>
       <p>Install Phenofhy locally or set it up in the OFH trusted research environment.</p>
     </a>
-    <a class="getting-started-card" href="/getting-started/quickstart">
+    <a class="getting-started-card" href="/phenofhy/getting-started/quickstart">
       <h3>4️⃣ Quickstart</h3>
       <p>Initialize a project and run your first phenotype extraction workflow.</p>
     </a>
