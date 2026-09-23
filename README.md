@@ -1,6 +1,6 @@
 ![Phenofhy cover](https://raw.githubusercontent.com/studiovincentstraub/phenofhy/main/logo/welcome-page.png)
 
-[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy)
+[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) ![Issues](https://img.shields.io/github/issues/studiovincentstraub/phenofhy) ![Purpose: Research](https://img.shields.io/badge/Purpose-Research-yellow) ![Python 3.11](https://img.shields.io/badge/Python-3.11-red) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-purple.svg)](LICENSE.md)
 
 # Phenofhy: The Python package to process phenotype data in Our Future Health
 
