@@ -1,3 +1,5 @@
+"""Functions for deriving new columns from existing data, including participant demographics, clinic measurements, questionnaire responses, and health records."""
+
 import re
 import ast
 import glob

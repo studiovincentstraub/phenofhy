@@ -1,3 +1,6 @@
+"""Functions for extracting phenotype values from DNAnexus datasets using config-defined field lists or inline field definitions."""
+from __future__ import annotations
+
 import pandas as pd
 import dxdata   
 import dxpy     

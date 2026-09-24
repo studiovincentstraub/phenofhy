@@ -1,6 +1,7 @@
-# phenofhy/profile.py
+"""Module for generating phenotype profiles."""
 
 from __future__ import annotations
+
 import logging
 from datetime import datetime
 from pathlib import Path

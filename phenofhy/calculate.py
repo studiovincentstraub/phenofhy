@@ -1,4 +1,5 @@
-# phenofhy/calculate.py
+"""Functions for computing grouped summaries of numeric and categorical traits in a dataframe, with support for derived columns, codebooks, and stratification."""
+from __future__ import annotations
 
 import os
 import re

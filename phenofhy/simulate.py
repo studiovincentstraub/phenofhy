@@ -1,3 +1,5 @@
+"""Simulation data functions for using phenofhy locally."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -148,38 +150,89 @@ def _normalize_fields(fields: str | Sequence[str] | None) -> list[str]:
 
 @lru_cache(maxsize=1)
 def _helpers_dir() -> Path:
-    return Path(__file__).resolve().parents[1] / "helpers"
-
+    return Path(__file__).resolve().parent / "helpers"
 
 @lru_cache(maxsize=1)
 def _data_dictionary() -> pd.DataFrame:
     path = _helpers_dir() / "data_dictionary.csv"
     df = pd.read_csv(path)
-    df = df[["entity", "field", "type"]].copy()
-    df["full_field"] = df["entity"].astype(str) + "." + df["field"].astype(str)
+
+    df = df[["entity", "name", "type"]].copy()
+    df = df.rename(columns={"name": "field"})
+
+    df["field"] = df["field"].astype(str).str.lower()
+    df["entity"] = df["entity"].astype(str).str.lower()
+
+    df["full_field"] = df["entity"] + "." + df["field"]
+
     return df
 
-
-@lru_cache(maxsize=2)
 def _coded_domains(include_nonresponse: bool) -> dict[str, list[float]]:
-    path = _helpers_dir() / "codings.csv"
-    df = pd.read_csv(path)
-    if "coding_name" in df.columns:
-        field_col = "coding_name"
-    elif "field" in df.columns:
-        field_col = "field"
-    else:
-        raise ValueError("codings.csv must contain either 'coding_name' or 'field' column")
+    # Load coding values
+    codings_path = _helpers_dir() / "codings.csv"
+    codings = pd.read_csv(codings_path)
 
-    df = df[["entity", field_col, "code"]].copy()
-    df["full_field"] = df["entity"].astype(str) + "." + df[field_col].astype(str)
+    required_coding_cols = {"coding_name", "code"}
+    if not required_coding_cols.issubset(codings.columns):
+        raise ValueError(
+            "codings.csv must contain 'coding_name' and 'code' columns"
+        )
+
+    # Load field -> coding_name mapping
+    dictionary_path = _helpers_dir() / "data_dictionary.csv"
+    dictionary = pd.read_csv(dictionary_path)
+
+    required_dictionary_cols = {"entity", "name", "coding_name"}
+    if not required_dictionary_cols.issubset(dictionary.columns):
+        raise ValueError(
+            "data_dictionary.csv must contain 'entity', 'name', "
+            "and 'coding_name' columns"
+        )
+
+    # Normalise names used internally by phenofhy
+    dictionary = dictionary[
+        ["entity", "name", "coding_name"]
+    ].dropna(subset=["coding_name"]).copy()
+
+    dictionary["full_field"] = (
+        dictionary["entity"].astype(str).str.lower()
+        + "."
+        + dictionary["name"].astype(str).str.lower()
+    )
+
+    # Normalise coding names before joining
+    dictionary["coding_name"] = (
+        dictionary["coding_name"].astype(str).str.lower()
+    )
+    codings["coding_name"] = (
+        codings["coding_name"].astype(str).str.lower()
+    )
+
+    # Attach entity.field to each coding
+    df = dictionary[["full_field", "coding_name"]].merge(
+        codings[["coding_name", "code"]],
+        on="coding_name",
+        how="inner",
+    )
+
     df["code"] = pd.to_numeric(df["code"], errors="coerce")
 
     domains: dict[str, list[float]] = {}
+
     for field, subdf in df.groupby("full_field", sort=False):
-        codes = [float(v) for v in subdf["code"].dropna().unique().tolist()]
-        filtered_codes = _filter_nonresponse_codes(field=field, codes=codes, include_nonresponse=include_nonresponse)
+        codes = [
+            float(v)
+            for v in subdf["code"].dropna().unique().tolist()
+        ]
+
+        filtered_codes = _filter_nonresponse_codes(
+            field=field,
+            codes=codes,
+            include_nonresponse=include_nonresponse,
+        )
+
         domains[field] = filtered_codes if filtered_codes else codes
+
     return domains
 
 

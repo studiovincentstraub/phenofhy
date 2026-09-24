@@ -1,3 +1,6 @@
+"""Functions for initializing a Phenofhy project and creating a config.json file."""
+from __future__ import annotations
+
 import json
 import os
 import re

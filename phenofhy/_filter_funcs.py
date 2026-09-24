@@ -1,4 +1,5 @@
-# _filter_funcs.py
+"""Functions for filtering rows in phenofhy dataframes based on known errors, implausible values, and other criteria."""
+
 from typing import Dict, Tuple, List, Optional
 from functools import reduce
 import pandas as pd

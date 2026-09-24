@@ -1,3 +1,5 @@
+"""Phenofhy: A Python package for phenotyping and health data analysis."""
+
 __version__ = "1.0.0"
 
 from . import (

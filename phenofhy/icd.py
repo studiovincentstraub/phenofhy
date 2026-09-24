@@ -1,4 +1,4 @@
-# icd.py
+"""Functions for matching ICD codes to traits in pandas and Spark DataFrames."""
 from __future__ import annotations
 
 import logging

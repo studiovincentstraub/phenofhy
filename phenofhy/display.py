@@ -1,5 +1,6 @@
-# phenofhy/display.py
+"""Functions for displaying and formatting grouped categorical results."""
 from __future__ import annotations
+
 from typing import Any, Dict, Iterable, List, Optional
 import re
 import numpy as np

@@ -1,3 +1,6 @@
+"""Functions for orchestrating the phenotype preprocessing pipeline: extraction and processing of fields."""
+from __future__ import annotations
+
 import os
 import json
 import logging

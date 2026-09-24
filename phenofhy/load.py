@@ -1,3 +1,6 @@
+"""Functions for loading and merging phenotype metadata from config and input files."""
+from __future__ import annotations
+
 import os
 import json
 import logging

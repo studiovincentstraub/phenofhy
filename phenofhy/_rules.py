@@ -1,8 +1,5 @@
-"""Default coalescing rules for common traits.
-
-Edit or extend DEFAULT_COALESCE_RULES as new questionnaire traits are added.
-Import this dict in preprocess.py and pass it to process_fields by default.
-"""
+"""Default coalescing rules for common traits."""
+from __future__ import annotations
 
 import re
 import ast
@@ -297,7 +294,7 @@ def coalesce_traits(
 
 
     
-def build_rules(overrides: CoalesceConfig | None = None,
+def build_rules(overrides: Optional[CoalesceConfig] = None,
                extend: CoalesceConfig | None = None) -> CoalesceConfig:
     """Combine default coalescing rules with user overrides.
 
