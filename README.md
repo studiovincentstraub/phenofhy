@@ -43,7 +43,7 @@ For development from a source checkout:
 python -m pip install -e .
 ```
 
-Recommended runtime: Python 3.10+ (tested in OFH TRE JupyterLab).
+Recommended runtime: Python 3.9 (tested in OFH TRE JupyterLab).
 
 ## Initialize a TRE project
 
@@ -59,7 +59,7 @@ Initialization discovers the current project and dataset, extracts the OFH metad
 
 Initialization requires:
 
-- Python 3.10 or newer;
+- Python 3.9 or newer;
 - the DNAnexus `dx` toolkit installed and authenticated;
 - `DX_PROJECT_CONTEXT_ID` set by the TRE environment;
 - permission to read the selected dataset and upload files to the project.
